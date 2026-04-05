@@ -40,6 +40,13 @@ struct GoalCarouselCardView: View {
         VStack(alignment: .leading) {
             // MARK: - Top: Icon + Name + Status
             HStack(spacing: 10) {
+                Text(goal.name)
+                    .font(.system(size: 12, weight: .bold, design: .default))
+                    .foregroundStyle(.primary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+                Spacer()
+                
                 ZStack {
                     Circle()
                         .fill(Color.appPrimary.opacity(0.15))
@@ -49,12 +56,6 @@ struct GoalCarouselCardView: View {
                         .font(.system(size: 12, weight: .semibold))
                         .foregroundStyle(Color.appPrimary)
                 }
-
-                Text(goal.name)
-                    .font(.system(size: 12, weight: .bold, design: .default))
-                    .foregroundStyle(.primary)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.8)
             }
 
             Spacer()
@@ -73,37 +74,47 @@ struct GoalCarouselCardView: View {
 
                 Spacer()
 
-                // Mini progress ring
-                ZStack {
-                    Circle()
-                        .stroke(Color.incomeGreen.opacity(0.15), lineWidth: 3)
-
-                    Circle()
-                        .trim(from: 0, to: animatedProgress)
-                        .stroke(
-                            goal.isCompleted ? Color.incomeGreen : Color.appPrimary,
-                            style: StrokeStyle(lineWidth: 3, lineCap: .round)
-                        )
-                        .rotationEffect(.degrees(-90))
-
-                    Text("\(Int(goal.progress * 100))%")
-                        .font(.system(size: 7, weight: .bold, design: .rounded))
-                        .foregroundStyle(.secondary)
-                }
-                .frame(width: 28, height: 28)
+                Image("Chip")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width:28,height: 28)
             }
 
             Spacer()
 
             // MARK: - Bottom: Amount + Target
-            VStack(alignment: .leading, spacing: 2) {
-                Text(goal.currentAmount.asCurrency)
-                    .font(.system(size: 18, weight: .bold, design: .rounded))
-                    .foregroundStyle(.primary)
+            VStack(alignment: .leading) {
+                HStack{
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(goal.currentAmount.asCurrency)
+                            .font(.system(size: 18, weight: .bold, design: .rounded))
+                            .foregroundStyle(.primary)
+                        
+                        Text("of \(goal.targetAmount.asCurrency) target")
+                            .font(.system(size: 10, weight: .regular))
+                            .foregroundStyle(.primary.opacity(0.6))
+                    }
+                    
+                    Spacer()
+                    // Mini progress ring
+                    ZStack {
+                        Circle()
+                            .stroke(Color.incomeGreen.opacity(0.15), lineWidth: 3)
 
-                Text("of \(goal.targetAmount.asCurrency) target")
-                    .font(.system(size: 10, weight: .regular))
-                    .foregroundStyle(.primary.opacity(0.6))
+                        Circle()
+                            .trim(from: 0, to: animatedProgress)
+                            .stroke(
+                                goal.isCompleted ? Color.incomeGreen : Color.appPrimary,
+                                style: StrokeStyle(lineWidth: 3, lineCap: .round)
+                            )
+                            .rotationEffect(.degrees(-90))
+
+                        Text("\(Int(goal.progress * 100))%")
+                            .font(.system(size: 6, weight: .bold, design: .rounded))
+                            .foregroundStyle(.secondary)
+                    }
+                    .frame(width: 24, height: 24)
+                }
             }
         }
         .padding(24)

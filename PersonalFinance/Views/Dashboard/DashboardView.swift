@@ -378,8 +378,13 @@ struct DashboardView: View {
                 spent: viewModel.totalBudgetSpent,
                 limit: viewModel.totalBudgetLimit
             )
+            .onTapGesture {
+                goalSegment = 2
+                selectedTab = 2
+            }
             .accessibilityElement(children: .ignore)
             .accessibilityLabel("Budget: \(Int(clampedPercent * 100)) percent used, \(viewModel.totalBudgetSpent.asCurrency) of \(viewModel.totalBudgetLimit.asCurrency)")
+            .accessibilityHint("Tap to view budget details")
         }
     }
 

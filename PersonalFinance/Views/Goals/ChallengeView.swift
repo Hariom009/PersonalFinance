@@ -54,20 +54,37 @@ struct ChallengeView: View {
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 32)
 
-            VStack(spacing: 8) {
+            VStack(spacing: 12) {
                 Text("Target Days")
                     .font(.caption)
                     .foregroundStyle(.secondary)
 
-                TextField("30", text: $viewModel.targetDaysText)
-                    .font(.system(size: 32, weight: .bold, design: .rounded))
-                    .keyboardType(.numberPad)
-                    .multilineTextAlignment(.center)
-                    .focused($targetDaysFocused)
-                    .frame(width: 120)
-                    .padding(.vertical, 12)
-                    .background(Color.cardBackground)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                PresetChipRow(selectedPreset: $viewModel.selectedPreset) { preset in
+                    viewModel.selectPreset(preset)
+                }
+
+                if viewModel.selectedPreset == .custom {
+                    TextField("30", text: $viewModel.targetDaysText)
+                        .font(.system(size: 32, weight: .bold, design: .rounded))
+                        .keyboardType(.numberPad)
+                        .multilineTextAlignment(.center)
+                        .focused($targetDaysFocused)
+                        .frame(width: 120)
+                        .padding(.vertical, 12)
+                        .background(Color.cardBackground)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .transition(.opacity.combined(with: .move(edge: .top)))
+                }
+
+                Text(viewModel.difficultyLabel)
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(viewModel.difficultyColor)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 6)
+                    .background(viewModel.difficultyColor.opacity(0.12))
+                    .clipShape(Capsule())
+                    .contentTransition(.numericText())
+                    .animation(.easeInOut(duration: 0.25), value: viewModel.difficultyLabel)
             }
 
             Button {
@@ -91,7 +108,13 @@ struct ChallengeView: View {
     private var activeChallengeContent: some View {
         VStack(spacing: 20) {
             streakHeroCard
-            statsRow
+
+            ProgressTimelineView(
+                currentDay: viewModel.dayNumber,
+                targetDays: viewModel.targetDays,
+                personalBest: viewModel.personalBest
+            )
+
             calendarSection
             exemptCategoriesSection
             endChallengeButton
@@ -143,35 +166,6 @@ struct ChallengeView: View {
         .clipShape(RoundedRectangle(cornerRadius: 20))
     }
 
-    // MARK: - Stats
-
-    private var statsRow: some View {
-        HStack(spacing: 12) {
-            challengeStatCard(title: "Best", value: "\(viewModel.personalBest)", icon: "trophy.fill")
-            challengeStatCard(title: "Target", value: "\(viewModel.targetDays)", icon: "flag.fill")
-            challengeStatCard(title: "Day", value: "\(viewModel.dayNumber)", icon: "calendar")
-        }
-    }
-
-    private func challengeStatCard(title: String, value: String, icon: String) -> some View {
-        VStack(spacing: 6) {
-            Image(systemName: icon)
-                .font(.system(size: 16))
-                .foregroundStyle(.orange)
-
-            Text(value)
-                .font(.system(.headline, design: .rounded).weight(.bold))
-
-            Text(title)
-                .font(.caption2)
-                .foregroundStyle(.secondary)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 12)
-        .background(Color.cardBackground)
-        .clipShape(RoundedRectangle(cornerRadius: 14))
-    }
-
     // MARK: - Calendar
 
     private var calendarSection: some View {
@@ -206,23 +200,26 @@ struct ChallengeView: View {
         VStack(alignment: .leading, spacing: 12) {
             SectionHeaderView(title: "Exempt Categories", subtitle: "These don't break your streak")
 
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 90))], spacing: 8) {
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 4), spacing: 8) {
                 ForEach(Category.expenseCategories) { category in
                     let isExempt = viewModel.exemptCategories.contains(category)
 
-                    HStack(spacing: 4) {
+                    VStack(spacing: 4) {
                         Image(systemName: category.iconName)
-                            .font(.system(size: 12))
+                            .font(.system(size: 14))
                         Text(category.title)
-                            .font(.caption)
+                            .font(.system(.caption2, design: .rounded).weight(.medium))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.8)
                     }
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 6)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 8)
                     .foregroundStyle(isExempt ? .incomeGreen : .secondary)
-                    .background(isExempt ? Color.incomeGreen.opacity(0.12) : Color.cardBackground)
-                    .clipShape(Capsule())
+                    .background(isExempt ? Color.incomeGreen.opacity(0.12) : Color(.systemGray6))
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
                     .overlay(
-                        Capsule().strokeBorder(isExempt ? Color.incomeGreen.opacity(0.3) : .clear, lineWidth: 1)
+                        RoundedRectangle(cornerRadius: 10)
+                            .strokeBorder(isExempt ? Color.incomeGreen.opacity(0.3) : .clear, lineWidth: 1)
                     )
                     .onTapGesture {
                         withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {

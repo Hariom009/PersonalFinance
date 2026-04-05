@@ -1,11 +1,39 @@
 import Foundation
 import SwiftData
+import SwiftUI
+
+// MARK: - Challenge Preset
+
+enum ChallengePreset: CaseIterable, Identifiable {
+    case week, twoWeeks, month, custom
+
+    var id: String { label }
+
+    var label: String {
+        switch self {
+        case .week: return "7 days"
+        case .twoWeeks: return "14 days"
+        case .month: return "30 days"
+        case .custom: return "Custom"
+        }
+    }
+
+    var days: Int? {
+        switch self {
+        case .week: return 7
+        case .twoWeeks: return 14
+        case .month: return 30
+        case .custom: return nil
+        }
+    }
+}
 
 @Observable
 final class ChallengeViewModel {
     var challenge: NoSpendChallenge? = nil
     var transactions: [Transaction] = []
     var targetDaysText: String = "30"
+    var selectedPreset: ChallengePreset? = .month
 
     private let challengeService = ChallengeService()
     private let transactionService = TransactionService()
@@ -47,7 +75,44 @@ final class ChallengeViewModel {
         challenge?.exemptCategories ?? []
     }
 
+    var progressFraction: Double {
+        guard targetDays > 0 else { return 0 }
+        return min(Double(dayNumber) / Double(targetDays), 1.0)
+    }
+
+    var personalBestFraction: Double {
+        guard targetDays > 0 else { return 0 }
+        return min(Double(personalBest) / Double(targetDays), 1.0)
+    }
+
+    var difficultyLabel: String {
+        let days = Int(targetDaysText) ?? 30
+        switch days {
+        case ...7: return "Easy"
+        case 8...14: return "Medium"
+        case 15...30: return "Hard"
+        default: return "Beast Mode"
+        }
+    }
+
+    var difficultyColor: Color {
+        let days = Int(targetDaysText) ?? 30
+        switch days {
+        case ...7: return .incomeGreen
+        case 8...14: return .orange
+        case 15...30: return .expenseRed
+        default: return .purple
+        }
+    }
+
     // MARK: - Methods
+
+    func selectPreset(_ preset: ChallengePreset) {
+        selectedPreset = preset
+        if let days = preset.days {
+            targetDaysText = "\(days)"
+        }
+    }
 
     func loadData(context: ModelContext) {
         do {

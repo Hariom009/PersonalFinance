@@ -6,6 +6,7 @@ struct DayStatus: Identifiable {
     let didSpend: Bool
     let isToday: Bool
     let isFuture: Bool
+    var consecutiveNoSpendDays: Int = 0
 }
 
 struct ChallengeService {
@@ -54,6 +55,20 @@ struct ChallengeService {
 
             guard let next = calendar.date(byAdding: .day, value: 1, to: currentDay) else { break }
             currentDay = next
+        }
+
+        // Forward pass: compute consecutive no-spend streak per day
+        var runningStreak = 0
+        for i in days.indices {
+            if days[i].isFuture {
+                days[i].consecutiveNoSpendDays = 0
+            } else if days[i].didSpend {
+                runningStreak = 0
+                days[i].consecutiveNoSpendDays = 0
+            } else {
+                runningStreak += 1
+                days[i].consecutiveNoSpendDays = runningStreak
+            }
         }
 
         return days
