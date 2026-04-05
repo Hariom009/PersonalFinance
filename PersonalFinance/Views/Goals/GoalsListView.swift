@@ -67,13 +67,21 @@ struct GoalsListView: View {
                             VStack(alignment: .leading, spacing: 12) {
                                 SectionHeaderView(title: "Active Goals")
 
-                                ForEach(viewModel.activeGoals) { goal in
-                                    NavigationLink {
-                                        GoalDetailView(goal: goal)
-                                    } label: {
-                                        goalCard(goal: goal)
+                                ScrollView(.horizontal, showsIndicators: false) {
+                                    HStack(spacing: 12) {
+                                        ForEach(viewModel.activeGoals) { goal in
+                                            NavigationLink {
+                                                GoalDetailView(goal: goal)
+                                            } label: {
+                                                GoalCarouselCardView(
+                                                    goal: goal,
+                                                    depth: .front
+                                                )
+                                            }
+                                            .buttonStyle(.plain)
+                                        }
                                     }
-                                    .buttonStyle(.plain)
+                                    .padding(.horizontal, 2)
                                 }
                             }
                         }

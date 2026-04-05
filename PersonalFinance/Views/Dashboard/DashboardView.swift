@@ -10,6 +10,7 @@ struct DashboardView: View {
     @State private var showAddTransaction = false
     @State private var showAddGoal = false
     @State private var selectedDay: String?
+    @State private var selectedGoal: SavingsGoal?
     @Binding var selectedTab: Int
 
     // Animation states
@@ -31,20 +32,16 @@ struct DashboardView: View {
                     } else {
                         VStack(spacing: 16) {
                             inlineNavBar
-                            greetingHeader
-                                .staggered(index: 0, appeared: hasAppeared, reduceMotion: reduceMotion)
-                            summaryCards
-                                .staggered(index: 1, appeared: hasAppeared, reduceMotion: reduceMotion)
-                            budgetHealthBar
-                                .staggered(index: 2, appeared: hasAppeared, reduceMotion: reduceMotion)
-                            weeklySpendingChart
-                                .staggered(index: 3, appeared: hasAppeared, reduceMotion: reduceMotion)
-                            categoryBreakdownChart
-                                .staggered(index: 4, appeared: hasAppeared, reduceMotion: reduceMotion)
                             savingsGoalsSection
-                                .staggered(index: 5, appeared: hasAppeared, reduceMotion: reduceMotion)
-                            recentTransactionsSection
-                                .staggered(index: 6, appeared: hasAppeared, reduceMotion: reduceMotion)
+                                .staggered(index: 0, appeared: hasAppeared, reduceMotion: reduceMotion)
+                            greetingHeader
+                                .staggered(index: 1, appeared: hasAppeared, reduceMotion: reduceMotion)
+                            summaryCards
+                                .staggered(index: 2, appeared: hasAppeared, reduceMotion: reduceMotion)
+                            budgetHealthBar
+                                .staggered(index: 3, appeared: hasAppeared, reduceMotion: reduceMotion)
+                            weeklySpendingChart
+                                .staggered(index: 4, appeared: hasAppeared, reduceMotion: reduceMotion)
                         }
                         .padding(.horizontal, 16)
                         .padding(.bottom, 80)
@@ -79,6 +76,9 @@ struct DashboardView: View {
                 }
 
                 fab
+            }
+            .navigationDestination(item: $selectedGoal) { goal in
+                GoalDetailView(goal: goal)
             }
             .sheet(isPresented: $showAddTransaction) {
                 viewModel.loadData(context: context)
@@ -474,13 +474,6 @@ struct DashboardView: View {
 
     private var savingsGoalsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            SectionHeaderView(
-                title: "Savings Goals",
-                buttonTitle: "See All"
-            ) {
-                selectedTab = 2
-            }
-
             if viewModel.goals.isEmpty {
                 VStack(spacing: 12) {
                     emptyStateView(
@@ -499,39 +492,22 @@ struct DashboardView: View {
                     .tint(.appPrimary)
                 }
             } else {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 12) {
-                        ForEach(viewModel.goals) { goal in
-                            NavigationLink {
-                                GoalDetailView(goal: goal)
-                            } label: {
-                                GoalCardView(goal: goal)
-                            }
-                            .buttonStyle(.plain)
-                        }
-
-                        Button {
-                            showAddGoal = true
-                        } label: {
-                            VStack(spacing: 8) {
-                                Image(systemName: "plus.circle")
-                                    .font(.title2)
-                                    .foregroundStyle(.appPrimary)
-                                Text("New Goal")
-                                    .font(.caption.weight(.medium))
-                                    .foregroundStyle(.secondary)
-                            }
-                            .frame(width: 160, height: 120)
-                            .background(Color.cardBackground)
-                            .clipShape(RoundedRectangle(cornerRadius: 14))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 14)
-                                    .strokeBorder(style: StrokeStyle(lineWidth: 1, dash: [6]))
-                                    .foregroundStyle(.secondary.opacity(0.3))
-                            )
-                        }
+                GoalCarouselView(
+                    goals: viewModel.goals,
+                    onAddGoal: { showAddGoal = true },
+                    onSelectGoal: { goal in
+                        selectedGoal = goal
                     }
+                )
+
+                Button {
+                    showAddGoal = true
+                } label: {
+                    Label("Add Goal", systemImage: "plus.circle")
+                        .font(.caption.weight(.medium))
+                        .foregroundStyle(.appPrimary)
                 }
+                .frame(maxWidth: .infinity, alignment: .trailing)
             }
         }
     }
