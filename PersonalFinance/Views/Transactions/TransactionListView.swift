@@ -28,14 +28,18 @@ struct TransactionListView: View {
 
                 fab
             }
-            .navigationTitle("Transactions")
+
             .searchable(text: $viewModel.searchText, prompt: "Search transactions...")
             .onAppear { viewModel.fetchTransactions(context: context) }
             .sheet(isPresented: $viewModel.showingAddSheet) {
                 NavigationStack {
                     AddTransactionView(
                         viewModel: AddTransactionViewModel(),
-                        onSave: { viewModel.fetchTransactions(context: context) }
+                        onSave: {
+                            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                                viewModel.fetchTransactions(context: context)
+                            }
+                        }
                     )
                 }
             }
@@ -78,8 +82,10 @@ struct TransactionListView: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 Text(viewModel.monthlyIncome.asCurrency)
-                    .font(.subheadline.weight(.semibold))
+                    .font(.system(.subheadline, design: .rounded).weight(.semibold))
                     .foregroundStyle(.incomeGreen)
+                    .contentTransition(.numericText())
+                    .animation(.easeInOut(duration: 0.3), value: viewModel.monthlyIncome)
             }
             .frame(maxWidth: .infinity)
 
@@ -91,8 +97,10 @@ struct TransactionListView: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 Text(viewModel.monthlyExpenses.asCurrency)
-                    .font(.subheadline.weight(.semibold))
+                    .font(.system(.subheadline, design: .rounded).weight(.semibold))
                     .foregroundStyle(.expenseRed)
+                    .contentTransition(.numericText())
+                    .animation(.easeInOut(duration: 0.3), value: viewModel.monthlyExpenses)
             }
             .frame(maxWidth: .infinity)
         }
@@ -191,6 +199,8 @@ struct TransactionListView: View {
             }
         }
         .listStyle(.plain)
+        .animation(.easeInOut(duration: 0.25), value: viewModel.selectedTypeFilter)
+        .animation(.easeInOut(duration: 0.25), value: viewModel.selectedCategoryFilter)
     }
 
     // MARK: - Floating Action Button

@@ -3,7 +3,9 @@ import SwiftData
 
 struct GoalsListView: View {
     @Environment(\.modelContext) private var context
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var viewModel = GoalsListViewModel()
+    @State private var overallBarProgress: Double = 0
 
     var body: some View {
         NavigationStack {
@@ -17,18 +19,20 @@ struct GoalsListView: View {
                 .padding(.horizontal)
                 .padding(.vertical, 8)
 
-                switch viewModel.selectedSegment {
-                case 0:
-                    goalsContent
-                case 1:
-                    ChallengeView()
-                case 2:
-                    BudgetListView()
-                default:
-                    goalsContent
+                Group {
+                    switch viewModel.selectedSegment {
+                    case 0:
+                        goalsContent
+                    case 1:
+                        ChallengeView()
+                    case 2:
+                        BudgetListView()
+                    default:
+                        goalsContent
+                    }
                 }
+                .animation(.easeInOut(duration: 0.25), value: viewModel.selectedSegment)
             }
-            .navigationTitle("Goals")
             .onAppear { viewModel.loadGoals(context: context) }
             .sheet(isPresented: $viewModel.showingAddGoal) {
                 NavigationStack {
@@ -120,7 +124,7 @@ struct GoalsListView: View {
                     .font(.subheadline.weight(.medium))
                 Spacer()
                 Text("\(viewModel.totalSaved.asCurrency) of \(viewModel.totalTarget.asCurrency)")
-                    .font(.caption)
+                    .font(.system(.caption, design: .rounded))
                     .foregroundStyle(.secondary)
             }
 
@@ -132,7 +136,7 @@ struct GoalsListView: View {
 
                     Capsule()
                         .fill(Color.appPrimary)
-                        .frame(width: geo.size.width * viewModel.overallProgress, height: 8)
+                        .frame(width: geo.size.width * overallBarProgress, height: 8)
                 }
             }
             .frame(height: 8)
@@ -140,6 +144,15 @@ struct GoalsListView: View {
         .padding(14)
         .background(Color.cardBackground)
         .clipShape(RoundedRectangle(cornerRadius: 14))
+        .onAppear {
+            if reduceMotion {
+                overallBarProgress = viewModel.overallProgress
+            } else {
+                withAnimation(.easeInOut(duration: 0.6).delay(0.1)) {
+                    overallBarProgress = viewModel.overallProgress
+                }
+            }
+        }
     }
 
     // MARK: - Goal Card
@@ -174,7 +187,7 @@ struct GoalsListView: View {
 
                 HStack {
                     Text("\(goal.currentAmount.asCurrency) of \(goal.targetAmount.asCurrency)")
-                        .font(.caption)
+                        .font(.system(.caption, design: .rounded))
                         .foregroundStyle(.secondary)
 
                     Spacer()

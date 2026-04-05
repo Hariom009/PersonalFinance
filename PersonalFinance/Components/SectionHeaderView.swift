@@ -10,7 +10,7 @@ struct SectionHeaderView: View {
         HStack(alignment: .firstTextBaseline) {
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
-                    .font(.title3.bold())
+                    .font(.system(.subheadline, design: .serif).weight(.semibold))
 
                 if let subtitle {
                     Text(subtitle)

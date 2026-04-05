@@ -59,6 +59,7 @@ struct AddTransactionView: View {
         .background(Color.cardBackground)
         .clipShape(RoundedRectangle(cornerRadius: 16))
         .padding(.horizontal)
+        .animation(.easeInOut(duration: 0.25), value: viewModel.type)
     }
 
     // MARK: - Type Toggle
@@ -81,7 +82,7 @@ struct AddTransactionView: View {
     private var categorySection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Category")
-                .font(.headline)
+                .font(.system(.headline, design: .serif))
                 .padding(.horizontal)
 
             CategoryGridView(
@@ -144,6 +145,7 @@ struct AddTransactionView: View {
             .buttonStyle(.borderedProminent)
             .controlSize(.large)
             .disabled(!viewModel.isValid)
+            .animation(.easeInOut(duration: 0.2), value: viewModel.isValid)
 
             if viewModel.isEditing {
                 Button(role: .destructive) {

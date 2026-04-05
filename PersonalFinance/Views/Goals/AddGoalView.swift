@@ -46,7 +46,7 @@ struct AddGoalView: View {
     private var nameSection: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Goal Name")
-                .font(.headline)
+                .font(.system(.headline, design: .serif))
 
             TextField("e.g., Vacation Fund", text: $viewModel.nameText)
                 .font(.title3)
@@ -63,7 +63,7 @@ struct AddGoalView: View {
     private var amountSection: some View {
         VStack(spacing: 8) {
             Text("Target Amount")
-                .font(.headline)
+                .font(.system(.headline, design: .serif))
 
             TextField("0.00", text: $viewModel.amountText)
                 .font(.system(size: 40, weight: .bold, design: .rounded))
@@ -84,7 +84,7 @@ struct AddGoalView: View {
     private var deadlineSection: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Target Date")
-                .font(.headline)
+                .font(.system(.headline, design: .serif))
                 .padding(.horizontal)
 
             DatePicker("Deadline", selection: $viewModel.deadline, in: Date.now..., displayedComponents: .date)
@@ -101,7 +101,7 @@ struct AddGoalView: View {
     private var iconSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Icon")
-                .font(.headline)
+                .font(.system(.headline, design: .serif))
                 .padding(.horizontal)
 
             LazyVGrid(columns: iconColumns, spacing: 12) {

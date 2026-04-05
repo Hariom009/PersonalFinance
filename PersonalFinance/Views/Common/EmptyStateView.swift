@@ -18,7 +18,7 @@ struct EmptyStateView: View {
                 .foregroundStyle(.secondary)
 
             Text(title)
-                .font(.title3.bold())
+                .font(.system(.title3, design: .serif).bold())
 
             Text(subtitle)
                 .font(.subheadline)

@@ -18,7 +18,11 @@ private struct TrendEntry: Identifiable {
 
 struct InsightsView: View {
     @Environment(\.modelContext) private var context
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var viewModel = InsightsViewModel()
+    @State private var hasAppeared = false
+    @State private var badgeAppeared = false
+    @State private var rankingProgress: Double = 0
 
     var body: some View {
         NavigationStack {
@@ -30,10 +34,15 @@ struct InsightsView: View {
                 } else {
                     VStack(spacing: 20) {
                         topCategoryCard
+                            .staggered(index: 0, appeared: hasAppeared, reduceMotion: reduceMotion)
                         weeklyComparisonChart
+                            .staggered(index: 1, appeared: hasAppeared, reduceMotion: reduceMotion)
                         monthlyTrendChart
+                            .staggered(index: 2, appeared: hasAppeared, reduceMotion: reduceMotion)
                         categoryRankingChart
+                            .staggered(index: 3, appeared: hasAppeared, reduceMotion: reduceMotion)
                         quickStatsGrid
+                            .staggered(index: 4, appeared: hasAppeared, reduceMotion: reduceMotion)
                     }
                     .padding(.horizontal, 16)
                     .padding(.bottom, 20)
@@ -42,7 +51,24 @@ struct InsightsView: View {
             .background(Color.appBackground)
             .navigationTitle("Insights")
             .navigationBarTitleDisplayMode(.inline)
-            .onAppear { viewModel.loadData(context: context) }
+            .onAppear {
+                viewModel.loadData(context: context)
+                guard !hasAppeared else { return }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    withAnimation { hasAppeared = true }
+                    if !reduceMotion {
+                        withAnimation(.spring(response: 0.4, dampingFraction: 0.5).delay(0.3)) {
+                            badgeAppeared = true
+                        }
+                        withAnimation(.easeOut(duration: 0.5).delay(0.3)) {
+                            rankingProgress = 1.0
+                        }
+                    } else {
+                        badgeAppeared = true
+                        rankingProgress = 1.0
+                    }
+                }
+            }
         }
     }
 
@@ -69,10 +95,10 @@ struct InsightsView: View {
                             .foregroundStyle(.secondary)
 
                         Text(top.category.title)
-                            .font(.title3.bold())
+                            .font(.system(.title3, design: .serif).bold())
 
                         Text(top.amount.asCurrency)
-                            .font(.headline)
+                            .font(.system(.headline, design: .rounded))
                             .foregroundStyle(top.category.color)
                     }
                 }
@@ -89,6 +115,8 @@ struct InsightsView: View {
                     .padding(.vertical, 4)
                     .background((isUp ? Color.expenseRed : Color.incomeGreen).opacity(0.12))
                     .clipShape(Capsule())
+                    .scaleEffect(badgeAppeared ? 1.0 : 0.8)
+                    .opacity(badgeAppeared ? 1 : 0)
                 }
             }
             .padding(16)
@@ -235,7 +263,7 @@ struct InsightsView: View {
             } else {
                 Chart(viewModel.categoryRanking) { item in
                     BarMark(
-                        x: .value("Amount", item.amount),
+                        x: .value("Amount", item.amount * rankingProgress),
                         y: .value("Category", item.category.title)
                     )
                     .foregroundStyle(item.category.color)
@@ -289,6 +317,7 @@ struct InsightsView: View {
                     label: "Avg. Daily Spend",
                     color: .appPrimary
                 )
+                .scaleEntrance(appeared: hasAppeared, delay: 0.3, reduceMotion: reduceMotion)
 
                 quickStatCard(
                     icon: stats.mostFrequentCategory?.iconName ?? "questionmark.circle",
@@ -296,6 +325,7 @@ struct InsightsView: View {
                     label: "Most Frequent",
                     color: stats.mostFrequentCategory?.color ?? .gray
                 )
+                .scaleEntrance(appeared: hasAppeared, delay: 0.36, reduceMotion: reduceMotion)
 
                 quickStatCard(
                     icon: "flame.fill",
@@ -303,6 +333,7 @@ struct InsightsView: View {
                     label: stats.biggestExpense?.note.isEmpty == false ? stats.biggestExpense!.note : "Biggest Expense",
                     color: .expenseRed
                 )
+                .scaleEntrance(appeared: hasAppeared, delay: 0.42, reduceMotion: reduceMotion)
 
                 quickStatCard(
                     icon: "clock.arrow.circlepath",
@@ -310,6 +341,7 @@ struct InsightsView: View {
                     label: "Since Last Income",
                     color: .appSecondary
                 )
+                .scaleEntrance(appeared: hasAppeared, delay: 0.48, reduceMotion: reduceMotion)
             }
         }
     }
@@ -327,7 +359,7 @@ struct InsightsView: View {
             }
 
             Text(value)
-                .font(.headline.weight(.semibold))
+                .font(.system(.headline, design: .rounded).weight(.semibold))
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
 

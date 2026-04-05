@@ -9,6 +9,7 @@ struct GoalDetailView: View {
     @FocusState private var focusedFundsField: FundsField?
     @State private var showDeleteConfirmation = false
     @State private var fundsTrigger = false
+    @State private var ringPulse = false
 
     enum FundsField { case amount, note }
 
@@ -50,6 +51,8 @@ struct GoalDetailView: View {
 
     private var progressSection: some View {
         CircularProgressView(progress: viewModel.goal.progress)
+            .scaleEffect(ringPulse ? 1.05 : 1.0)
+            .animation(.spring(response: 0.3, dampingFraction: 0.5), value: ringPulse)
             .padding(.top, 8)
     }
 
@@ -71,7 +74,7 @@ struct GoalDetailView: View {
     private func statItem(title: String, value: String) -> some View {
         VStack(spacing: 4) {
             Text(value)
-                .font(.subheadline.weight(.semibold))
+                .font(.system(.subheadline, design: .rounded).weight(.semibold))
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
             Text(title)
@@ -138,7 +141,7 @@ struct GoalDetailView: View {
 
                             VStack(alignment: .leading, spacing: 2) {
                                 Text("+\(contribution.amount.asCurrency)")
-                                    .font(.subheadline.weight(.semibold))
+                                    .font(.system(.subheadline, design: .rounded).weight(.semibold))
                                     .foregroundStyle(.incomeGreen)
 
                                 Text(contribution.note.isEmpty ? "Contribution" : contribution.note)
@@ -207,7 +210,7 @@ struct GoalDetailView: View {
         NavigationStack {
             VStack(spacing: 20) {
                 Text("Add Funds")
-                    .font(.title3.bold())
+                    .font(.system(.title3, design: .serif).bold())
 
                 TextField("0.00", text: $viewModel.fundsAmount)
                     .font(.system(size: 40, weight: .bold, design: .rounded))
@@ -226,6 +229,10 @@ struct GoalDetailView: View {
                     viewModel.addFunds(context: context)
                     fundsTrigger.toggle()
                     viewModel.showingAddFunds = false
+                    ringPulse = true
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        ringPulse = false
+                    }
                 } label: {
                     Text("Add")
                         .frame(maxWidth: .infinity)

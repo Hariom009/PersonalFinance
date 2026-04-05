@@ -5,6 +5,10 @@ struct BudgetProgressRow: View {
     let spent: Double
     let limit: Double
 
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var animatedProgress: Double = 0
+    @State private var shakeAmount: CGFloat = 0
+
     private var progress: Double {
         guard limit > 0 else { return 0 }
         return spent / limit
@@ -39,7 +43,7 @@ struct BudgetProgressRow: View {
                 Spacer()
 
                 Text("\(spent.asCurrency) / \(limit.asCurrency)")
-                    .font(.caption)
+                    .font(.system(.caption, design: .rounded))
                     .foregroundStyle(.secondary)
             }
 
@@ -51,8 +55,7 @@ struct BudgetProgressRow: View {
 
                     Capsule()
                         .fill(statusColor)
-                        .frame(width: geo.size.width * min(progress, 1.0), height: 8)
-                        .animation(.easeInOut(duration: 0.6), value: progress)
+                        .frame(width: geo.size.width * min(animatedProgress, 1.0), height: 8)
                 }
             }
             .frame(height: 8)
@@ -61,14 +64,29 @@ struct BudgetProgressRow: View {
                 HStack {
                     Spacer()
                     Text("Over by \((spent - limit).asCurrency)")
-                        .font(.caption2)
+                        .font(.system(.caption2, design: .rounded))
                         .foregroundStyle(.expenseRed)
+                        .modifier(ShakeEffect(amount: shakeAmount))
                 }
             }
         }
         .padding(14)
         .background(Color.cardBackground)
         .clipShape(RoundedRectangle(cornerRadius: 12))
+        .onAppear {
+            if reduceMotion {
+                animatedProgress = min(progress, 1.0)
+            } else {
+                withAnimation(.easeInOut(duration: 0.5).delay(0.1)) {
+                    animatedProgress = min(progress, 1.0)
+                }
+                if isOverBudget {
+                    withAnimation(.easeOut(duration: 0.5).delay(0.6)) {
+                        shakeAmount = 1
+                    }
+                }
+            }
+        }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("\(category.title) budget: \(spent.asCurrency) of \(limit.asCurrency), \(Int(min(progress, 1.0) * 100)) percent")
     }

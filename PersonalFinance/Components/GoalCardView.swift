@@ -3,6 +3,9 @@ import SwiftUI
 struct GoalCardView: View {
     let goal: SavingsGoal
 
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var animatedProgress: Double = 0
+
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             ZStack {
@@ -27,13 +30,13 @@ struct GoalCardView: View {
 
                     Capsule()
                         .fill(Color.appPrimary)
-                        .frame(width: geo.size.width * goal.progress, height: 6)
+                        .frame(width: geo.size.width * animatedProgress, height: 6)
                 }
             }
             .frame(height: 6)
 
             Text("\(goal.currentAmount.asCurrency) of \(goal.targetAmount.asCurrency)")
-                .font(.caption2)
+                .font(.system(.caption2, design: .rounded))
                 .foregroundStyle(.secondary)
                 .lineLimit(1)
         }
@@ -42,5 +45,14 @@ struct GoalCardView: View {
         .background(Color.cardBackground)
         .clipShape(RoundedRectangle(cornerRadius: 14))
         .shadow(color: .black.opacity(0.04), radius: 8, x: 0, y: 2)
+        .onAppear {
+            if reduceMotion {
+                animatedProgress = goal.progress
+            } else {
+                withAnimation(.easeInOut(duration: 0.5).delay(0.1)) {
+                    animatedProgress = goal.progress
+                }
+            }
+        }
     }
 }

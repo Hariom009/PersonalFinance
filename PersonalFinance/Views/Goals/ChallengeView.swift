@@ -3,9 +3,11 @@ import SwiftData
 
 struct ChallengeView: View {
     @Environment(\.modelContext) private var context
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var viewModel = ChallengeViewModel()
     @FocusState private var targetDaysFocused: Bool
     @State private var showEndConfirmation = false
+    @State private var flameAppeared = false
 
     var body: some View {
         ScrollView {
@@ -15,7 +17,16 @@ struct ChallengeView: View {
                 startChallengeContent
             }
         }
-        .onAppear { viewModel.loadData(context: context) }
+        .onAppear {
+            viewModel.loadData(context: context)
+            if !reduceMotion {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    flameAppeared = true
+                }
+            } else {
+                flameAppeared = true
+            }
+        }
         .toolbar {
             ToolbarItemGroup(placement: .keyboard) {
                 Spacer()
@@ -35,7 +46,7 @@ struct ChallengeView: View {
                 .foregroundStyle(.orange)
 
             Text("No-Spend Challenge")
-                .font(.title.bold())
+                .font(.system(.title, design: .serif).bold())
 
             Text("See how many days you can go without unnecessary spending")
                 .font(.subheadline)
@@ -96,9 +107,18 @@ struct ChallengeView: View {
             Image(systemName: "flame.fill")
                 .font(.system(size: 44))
                 .foregroundStyle(.orange)
+                .offset(y: flameAppeared ? 0 : -10)
+                .opacity(flameAppeared ? 1 : 0)
+                .animation(
+                    reduceMotion ? .none : .spring(response: 0.5, dampingFraction: 0.4).delay(0.2),
+                    value: flameAppeared
+                )
 
-            Text("\(viewModel.currentStreak)")
-                .font(.system(size: 64, weight: .bold, design: .rounded))
+            AnimatingIntView(
+                target: viewModel.currentStreak,
+                font: .system(size: 64, weight: .bold, design: .rounded),
+                reduceMotion: reduceMotion
+            )
 
             Text("day streak")
                 .font(.title3)
@@ -140,7 +160,7 @@ struct ChallengeView: View {
                 .foregroundStyle(.orange)
 
             Text(value)
-                .font(.headline.weight(.bold))
+                .font(.system(.headline, design: .rounded).weight(.bold))
 
             Text(title)
                 .font(.caption2)
@@ -205,7 +225,9 @@ struct ChallengeView: View {
                         Capsule().strokeBorder(isExempt ? Color.incomeGreen.opacity(0.3) : .clear, lineWidth: 1)
                     )
                     .onTapGesture {
-                        viewModel.toggleExemptCategory(category, context: context)
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                            viewModel.toggleExemptCategory(category, context: context)
+                        }
                     }
                 }
             }

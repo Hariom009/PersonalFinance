@@ -13,7 +13,7 @@ struct TransactionsPlaceholderView: View {
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
-            .navigationTitle("Transactions")
+         //   .navigationTitle("Transactions")
         }
     }
 }

@@ -20,21 +20,31 @@ struct CategorySpending: Identifiable {
 final class DashboardViewModel {
     var transactions: [Transaction] = []
     var goals: [SavingsGoal] = []
+    var budgets: [Budget] = []
     var isLoading = false
+    var errorMessage: String?
 
     private let transactionService = TransactionService()
     private let goalService = GoalService()
+    private let budgetService = BudgetService()
 
     // MARK: - Greeting
 
-    var greeting: String {
+    func greeting(for userName: String) -> String {
         let hour = Calendar.current.component(.hour, from: .now)
+        let timeGreeting: String
         switch hour {
-        case 5..<12: return "Good morning"
-        case 12..<17: return "Good afternoon"
-        case 17..<22: return "Good evening"
-        default: return "Good night"
+        case 5..<12: timeGreeting = "Good morning"
+        case 12..<17: timeGreeting = "Good afternoon"
+        case 17..<22: timeGreeting = "Good evening"
+        default: timeGreeting = "Good night"
         }
+
+        let trimmed = userName.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmed.isEmpty {
+            return timeGreeting
+        }
+        return "\(timeGreeting), \(trimmed)"
     }
 
     // MARK: - Monthly Totals
@@ -55,18 +65,38 @@ final class DashboardViewModel {
         monthlyIncome - monthlyExpenses
     }
 
-    var totalSaved: Double {
-        goals.reduce(0) { $0 + $1.currentAmount }
+    var leftToSpend: Double {
+        monthlyIncome - monthlyExpenses
     }
 
-    // MARK: - Weekly Spending Chart
+    // MARK: - Budget Health
+
+    var totalBudgetLimit: Double {
+        budgets.reduce(0) { $0 + $1.monthlyLimit }
+    }
+
+    var totalBudgetSpent: Double {
+        budgets.reduce(0) { total, budget in
+            total + budgetService.spentForCategory(budget.category, month: .now, transactions: transactions)
+        }
+    }
+
+    var budgetUsagePercent: Double {
+        guard totalBudgetLimit > 0 else { return 0 }
+        return totalBudgetSpent / totalBudgetLimit
+    }
+
+    var hasBudgets: Bool {
+        !budgets.isEmpty
+    }
+
+    // MARK: - Weekly Spending Chart (Rolling 7 days)
 
     var weeklySpending: [DailySpending] {
         let calendar = Calendar.current
-        let startOfWeek = Date.now.startOfWeek
 
         return (0..<7).map { offset in
-            let dayDate = calendar.date(byAdding: .day, value: offset, to: startOfWeek) ?? .now
+            let dayDate = calendar.date(byAdding: .day, value: -(6 - offset), to: .now.startOfDay) ?? .now
 
             let dayExpenses = transactions
                 .filter { $0.type == .expense && calendar.isDate($0.date, inSameDayAs: dayDate) }
@@ -120,22 +150,30 @@ final class DashboardViewModel {
         return result
     }
 
+    var totalMonthlyExpenses: Double {
+        monthlyExpenses
+    }
+
     // MARK: - Recent Transactions
 
     var recentTransactions: [Transaction] {
-        Array(transactions.prefix(5))
+        Array(transactions.prefix(3))
     }
 
     // MARK: - Data Loading
 
     func loadData(context: ModelContext) {
         isLoading = true
+        errorMessage = nil
         do {
             transactions = try transactionService.fetch(context: context)
             goals = try goalService.fetch(context: context)
+            budgets = try budgetService.fetchBudgets(context: context)
         } catch {
             transactions = []
             goals = []
+            budgets = []
+            errorMessage = "Couldn't load your data. Tap to retry."
         }
         isLoading = false
     }
