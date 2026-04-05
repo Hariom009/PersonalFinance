@@ -364,56 +364,22 @@ struct DashboardView: View {
     private var budgetHealthBar: some View {
         if viewModel.hasBudgets {
             let percent = viewModel.budgetUsagePercent
+            let clampedPercent = min(percent, 1.0)
             let statusColor: Color = {
                 if percent >= 1.0 { return .expenseRed }
                 if percent >= 0.8 { return .orange }
                 return .incomeGreen
             }()
 
-            VStack(spacing: 8) {
-                HStack {
-                    Text("Budget")
-                        .font(.system(.subheadline, design: .serif).weight(.medium))
-
-                    Spacer()
-
-                    Text("\(Int(min(percent, 1.0) * 100))% used")
-                        .font(.caption.weight(.medium))
-                        .foregroundStyle(statusColor)
-                }
-
-                GeometryReader { geo in
-                    ZStack(alignment: .leading) {
-                        Capsule()
-                            .fill(statusColor.opacity(0.15))
-                            .frame(height: 8)
-
-                        Capsule()
-                            .fill(statusColor)
-                            .frame(
-                                width: geo.size.width * min(percent, 1.0) * budgetBarProgress,
-                                height: 8
-                            )
-                    }
-                }
-                .frame(height: 8)
-
-                HStack {
-                    Text(viewModel.totalBudgetSpent.asCurrency)
-                        .font(.system(.caption2, design: .rounded))
-                        .foregroundStyle(.secondary)
-                    Spacer()
-                    Text(viewModel.totalBudgetLimit.asCurrency)
-                        .font(.system(.caption2, design: .rounded))
-                        .foregroundStyle(.secondary)
-                }
-            }
-            .padding(14)
-            .background(Color.cardBackground)
-            .clipShape(RoundedRectangle(cornerRadius: 14))
-            .shadow(color: .black.opacity(0.04), radius: 8, x: 0, y: 2)
+            BudgetFillCard(
+                statusColor: statusColor,
+                progress: clampedPercent * budgetBarProgress,
+                percent: percent,
+                spent: viewModel.totalBudgetSpent,
+                limit: viewModel.totalBudgetLimit
+            )
             .accessibilityElement(children: .ignore)
-            .accessibilityLabel("Budget: \(Int(min(percent, 1.0) * 100)) percent used, \(viewModel.totalBudgetSpent.asCurrency) of \(viewModel.totalBudgetLimit.asCurrency)")
+            .accessibilityLabel("Budget: \(Int(clampedPercent * 100)) percent used, \(viewModel.totalBudgetSpent.asCurrency) of \(viewModel.totalBudgetLimit.asCurrency)")
         }
     }
 

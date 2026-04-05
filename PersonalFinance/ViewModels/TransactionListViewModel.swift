@@ -27,6 +27,24 @@ final class TransactionListViewModel {
             .reduce(0) { $0 + $1.amount }
     }
 
+    var netBalance: Double {
+        monthlyIncome - monthlyExpenses
+    }
+
+    var lastMonthExpenses: Double {
+        let calendar = Calendar.current
+        let thisMonthStart = Date.now.startOfMonth
+        let lastMonthStart = calendar.date(byAdding: .month, value: -1, to: thisMonthStart) ?? thisMonthStart
+        return transactions
+            .filter { $0.type == .expense && $0.date >= lastMonthStart && $0.date < thisMonthStart }
+            .reduce(0) { $0 + $1.amount }
+    }
+
+    var spendingTrendPercent: Double {
+        guard lastMonthExpenses > 0 else { return 0 }
+        return ((monthlyExpenses - lastMonthExpenses) / lastMonthExpenses) * 100
+    }
+
     var filteredTransactions: [Transaction] {
         var result = transactions
 
@@ -49,7 +67,7 @@ final class TransactionListViewModel {
         return result
     }
 
-    var groupedTransactions: [(key: String, transactions: [Transaction])] {
+    var groupedTransactions: [(key: String, transactions: [Transaction], sectionIncome: Double, sectionExpenses: Double)] {
         let grouped = Dictionary(grouping: filteredTransactions) { transaction -> String in
             if transaction.date.isToday { return "Today" }
             if transaction.date.isYesterday { return "Yesterday" }
@@ -60,7 +78,9 @@ final class TransactionListViewModel {
         let order = ["Today", "Yesterday", "This Week", "Earlier"]
         return order.compactMap { key in
             guard let items = grouped[key], !items.isEmpty else { return nil }
-            return (key: key, transactions: items)
+            let income = items.filter { $0.type == .income }.reduce(0) { $0 + $1.amount }
+            let expenses = items.filter { $0.type == .expense }.reduce(0) { $0 + $1.amount }
+            return (key: key, transactions: items, sectionIncome: income, sectionExpenses: expenses)
         }
     }
 

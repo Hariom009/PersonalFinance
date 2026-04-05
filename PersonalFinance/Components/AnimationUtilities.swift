@@ -162,3 +162,28 @@ extension View {
         modifier(ScaleEntrance(appeared: appeared, delay: delay, reduceMotion: reduceMotion))
     }
 }
+
+// MARK: - Icon Bounce
+
+struct IconBounce: ViewModifier {
+    let appeared: Bool
+    let delay: Double
+    let reduceMotion: Bool
+
+    func body(content: Content) -> some View {
+        content
+            .scaleEffect(appeared ? 1.0 : (reduceMotion ? 1.0 : 0.6))
+            .animation(
+                reduceMotion
+                    ? .none
+                    : .spring(response: 0.35, dampingFraction: 0.5).delay(delay),
+                value: appeared
+            )
+    }
+}
+
+extension View {
+    func iconBounce(appeared: Bool, delay: Double = 0, reduceMotion: Bool = false) -> some View {
+        modifier(IconBounce(appeared: appeared, delay: delay, reduceMotion: reduceMotion))
+    }
+}

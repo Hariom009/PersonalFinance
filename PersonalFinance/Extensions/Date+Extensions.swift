@@ -44,4 +44,14 @@ extension Date {
         if isYesterday { return "Yesterday" }
         return formattedShort
     }
+
+    var formattedTime: String {
+        formatted(.dateTime.hour().minute())
+    }
+
+    var formattedRelativeWithTime: String {
+        if isToday { return formattedTime }
+        if isYesterday { return "Yesterday" }
+        return formattedShort
+    }
 }
