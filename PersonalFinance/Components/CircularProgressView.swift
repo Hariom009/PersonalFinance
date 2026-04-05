@@ -28,13 +28,13 @@ struct CircularProgressView: View {
                 }
             }
 
-            VStack(spacing: 4) {
+            VStack(spacing: AppSpacing.xs) {
                 Text("\(Int(animatedProgress * 100))%")
                     .font(.system(.title, design: .rounded).bold())
                     .contentTransition(.numericText())
 
                 Text("saved")
-                    .font(.caption)
+                    .font(.footnote)
                     .foregroundStyle(.secondary)
             }
         }

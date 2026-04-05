@@ -6,22 +6,22 @@ struct TransactionRowView: View {
     var reduceMotion: Bool = false
 
     var body: some View {
-        HStack(spacing: 10) {
+        HStack(spacing: AppSpacing.md) {
             ZStack {
                 Circle()
                     .fill(transaction.category.color.opacity(0.12))
-                    .frame(width: 36, height: 36)
+                    .frame(width: AppSize.iconContainerSmall, height: AppSize.iconContainerSmall)
 
                 Image(systemName: transaction.category.iconName)
-                    .font(.system(size: 14))
+                    .font(.system(size: AppSize.iconSmall))
                     .foregroundStyle(transaction.category.color)
             }
             .overlay(alignment: .bottomTrailing) {
                 if transaction.isRecurring {
                     Image(systemName: "arrow.triangle.2.circlepath")
-                        .font(.system(size: 7, weight: .bold))
+                        .font(.system(size: 9, weight: .bold))
                         .foregroundStyle(.white)
-                        .padding(2.5)
+                        .padding(3)
                         .background(transaction.category.color)
                         .clipShape(Circle())
                         .offset(x: 2, y: 2)
@@ -29,25 +29,25 @@ struct TransactionRowView: View {
             }
             .iconBounce(appeared: appeared, reduceMotion: reduceMotion)
 
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: AppSpacing.xxs) {
                 Text(transaction.category.title)
-                    .font(.caption.weight(.medium))
+                    .font(.callout.weight(.semibold))
 
                 Text(transaction.note.isEmpty ? "No note" : transaction.note)
-                    .font(.caption2)
+                    .font(.caption)
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
             }
 
             Spacer()
 
-            VStack(alignment: .trailing, spacing: 2) {
+            VStack(alignment: .trailing, spacing: AppSpacing.xxs) {
                 Text(amountText)
-                    .font(.system(.caption, design: .rounded).weight(.semibold))
+                    .font(.system(.callout, design: .rounded).weight(.semibold))
                     .foregroundStyle(transaction.type == .income ? .incomeGreen : .expenseRed)
 
                 Text(transaction.date.formattedRelativeWithTime)
-                    .font(.caption2)
+                    .font(.caption)
                     .foregroundStyle(.secondary)
             }
         }

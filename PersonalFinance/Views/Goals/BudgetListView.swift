@@ -155,13 +155,13 @@ struct BudgetListView: View {
                 limit: viewModel.totalLimit
             )
 
-            HStack(spacing: 6) {
+            HStack(spacing: AppSpacing.sm) {
                 Image(systemName: "checkmark.shield.fill")
-                    .font(.system(size: 13))
+                    .font(.system(size: 15))
                     .foregroundStyle(viewModel.overallStatusColor)
 
                 Text("You have \(viewModel.totalRemaining.asCurrency) remaining this month")
-                    .font(.caption.weight(.medium))
+                    .font(.footnote.weight(.medium))
                     .foregroundStyle(.secondary)
             }
         }
@@ -265,7 +265,7 @@ struct BudgetListView: View {
                                 }
 
                                 Text(category.title)
-                                    .font(.caption2)
+                                    .font(.caption)
                                     .foregroundStyle(isSelected ? .primary : .secondary)
                             }
                             .onTapGesture {

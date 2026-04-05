@@ -25,6 +25,13 @@ final class AddTransactionViewModel {
         amountValue > 0 && category != nil
     }
 
+    var validationMessage: String {
+        var missing: [String] = []
+        if amountValue <= 0 { missing.append("enter an amount") }
+        if category == nil { missing.append("select a category") }
+        return "Please \(missing.joined(separator: " and ")) to save."
+    }
+
     var availableCategories: [Category] {
         type == .expense ? Category.expenseCategories : Category.incomeCategories
     }

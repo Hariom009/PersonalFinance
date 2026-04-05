@@ -41,19 +41,19 @@ struct GoalCarouselCardView: View {
             // MARK: - Top: Icon + Name + Status
             HStack(spacing: 10) {
                 Text(goal.name)
-                    .font(.system(size: 12, weight: .bold, design: .default))
+                    .font(.system(size: 14, weight: .bold, design: .default))
                     .foregroundStyle(.primary)
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
                 Spacer()
-                
+
                 ZStack {
                     Circle()
                         .fill(Color.appPrimary.opacity(0.15))
-                        .frame(width: 28, height: 28)
+                        .frame(width: 32, height: 32)
 
                     Image(systemName: goal.iconName)
-                        .font(.system(size: 12, weight: .semibold))
+                        .font(.system(size: 14, weight: .semibold))
                         .foregroundStyle(Color.appPrimary)
                 }
             }
@@ -62,13 +62,13 @@ struct GoalCarouselCardView: View {
 
             // MARK: - Middle: Deadline + Progress Ring
             HStack {
-                VStack(alignment: .leading, spacing: 2) {
+                VStack(alignment: .leading, spacing: AppSpacing.xxs) {
                     Text(deadlineLabel)
-                        .font(.system(size: 12, weight: .semibold))
+                        .font(.system(size: 13, weight: .semibold))
                         .foregroundStyle(.primary)
 
                     Text(daysRemainingLabel)
-                        .font(.system(size: 8, weight: .medium))
+                        .font(.system(size: 11, weight: .medium))
                         .foregroundStyle(.secondary)
                 }
 
@@ -85,13 +85,13 @@ struct GoalCarouselCardView: View {
             // MARK: - Bottom: Amount + Target
             VStack(alignment: .leading) {
                 HStack{
-                    VStack(alignment: .leading, spacing: 2) {
+                    VStack(alignment: .leading, spacing: AppSpacing.xxs) {
                         Text(goal.currentAmount.asCurrency)
-                            .font(.system(size: 18, weight: .bold, design: .rounded))
+                            .font(.system(size: 20, weight: .bold, design: .rounded))
                             .foregroundStyle(.primary)
-                        
+
                         Text("of \(goal.targetAmount.asCurrency) target")
-                            .font(.system(size: 10, weight: .regular))
+                            .font(.system(size: 12, weight: .regular))
                             .foregroundStyle(.primary.opacity(0.6))
                     }
                     
@@ -110,15 +110,15 @@ struct GoalCarouselCardView: View {
                             .rotationEffect(.degrees(-90))
 
                         Text("\(Int(goal.progress * 100))%")
-                            .font(.system(size: 6, weight: .bold, design: .rounded))
+                            .font(.system(size: 8, weight: .bold, design: .rounded))
                             .foregroundStyle(.secondary)
                     }
-                    .frame(width: 24, height: 24)
+                    .frame(width: 28, height: 28)
                 }
             }
         }
         .padding(24)
-        .frame(width: 190, height: 276)
+        .frame(width: 210, height: 290)
         .background {
             ZStack {
                 RoundedRectangle(cornerRadius: 20)

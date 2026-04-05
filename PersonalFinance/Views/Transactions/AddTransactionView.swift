@@ -9,6 +9,8 @@ struct AddTransactionView: View {
 
     @FocusState private var focusedField: Field?
     @State private var showDeleteConfirmation = false
+    @State private var showValidationAlert = false
+    @State private var showValidationHints = false
     @State private var saveTrigger = false
 
     enum Field { case amount, note }
@@ -20,7 +22,9 @@ struct AddTransactionView: View {
                 typeToggle
                 categorySection
                 detailsSection
-                actionButtons
+                if viewModel.isEditing {
+                    deleteButton
+                }
             }
             .padding(.vertical)
         }
@@ -31,12 +35,44 @@ struct AddTransactionView: View {
             ToolbarItem(placement: .cancellationAction) {
                 Button("Cancel") { dismiss() }
             }
+            ToolbarItem(placement: .confirmationAction) {
+                Button {
+                    if viewModel.isValid {
+                        viewModel.save(context: context)
+                        saveTrigger.toggle()
+                        onSave()
+                        dismiss()
+                    } else {
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            showValidationHints = true
+                        }
+                        showValidationAlert = true
+                    }
+                } label: {
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 16, weight: .bold, design: .rounded))
+                        .foregroundStyle(viewModel.isValid ? Color.black : .gray.opacity(0.4))
+                }
+                .animation(.easeInOut(duration: 0.2), value: viewModel.isValid)
+            }
             ToolbarItemGroup(placement: .keyboard) {
                 Spacer()
                 Button("Done") { focusedField = nil }
             }
         }
         .sensoryFeedback(.success, trigger: saveTrigger)
+        .onChange(of: viewModel.isValid) {
+            if viewModel.isValid && showValidationHints {
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    showValidationHints = false
+                }
+            }
+        }
+        .alert("Missing Info", isPresented: $showValidationAlert) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(viewModel.validationMessage)
+        }
     }
 
     // MARK: - Amount Input
@@ -50,9 +86,17 @@ struct AddTransactionView: View {
                 .foregroundStyle(viewModel.type == .income ? .incomeGreen : .expenseRed)
                 .focused($focusedField, equals: .amount)
 
-            Text(viewModel.type == .income ? "Income" : "Expense")
-                .font(.caption)
-                .foregroundStyle(.secondary)
+            HStack(spacing: 2) {
+                if showValidationHints && viewModel.amountValue <= 0 {
+                    Image(systemName: "staroflife.fill")
+                        .font(.system(size: 8))
+                        .foregroundStyle(.red)
+                        .transition(.scale.combined(with: .opacity))
+                }
+                Text(viewModel.type == .income ? "Income" : "Expense")
+                    .font(.footnote)
+                    .foregroundStyle(showValidationHints && viewModel.amountValue <= 0 ? .red : .secondary)
+            }
         }
         .padding(.vertical, 20)
         .frame(maxWidth: .infinity)
@@ -81,9 +125,17 @@ struct AddTransactionView: View {
 
     private var categorySection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Category")
-                .font(.system(.headline, design: .serif))
-                .padding(.horizontal)
+            HStack(spacing: 4) {
+                Text("Category")
+                    .font(.system(.headline, design: .serif))
+                if showValidationHints && viewModel.category == nil {
+                    Image(systemName: "staroflife.fill")
+                        .font(.system(size: 8))
+                        .foregroundStyle(.red)
+                        .transition(.scale.combined(with: .opacity))
+                }
+            }
+            .padding(.horizontal)
 
             CategoryGridView(
                 categories: viewModel.availableCategories,
@@ -129,47 +181,29 @@ struct AddTransactionView: View {
         .padding(.horizontal)
     }
 
-    // MARK: - Action Buttons
+    // MARK: - Delete Button
 
-    private var actionButtons: some View {
-        VStack(spacing: 12) {
-            Button {
-                viewModel.save(context: context)
-                saveTrigger.toggle()
+    private var deleteButton: some View {
+        Button(role: .destructive) {
+            showDeleteConfirmation = true
+        } label: {
+            Text("Delete Transaction")
+                .frame(maxWidth: .infinity)
+        }
+        .controlSize(.large)
+        .padding(.horizontal)
+        .confirmationDialog(
+            "Delete this transaction?",
+            isPresented: $showDeleteConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("Delete", role: .destructive) {
+                viewModel.deleteTransaction(context: context)
                 onSave()
                 dismiss()
-            } label: {
-                Text(viewModel.saveButtonTitle)
-                    .frame(maxWidth: .infinity)
             }
-            .buttonStyle(.borderedProminent)
-            .controlSize(.large)
-            .disabled(!viewModel.isValid)
-            .animation(.easeInOut(duration: 0.2), value: viewModel.isValid)
-
-            if viewModel.isEditing {
-                Button(role: .destructive) {
-                    showDeleteConfirmation = true
-                } label: {
-                    Text("Delete Transaction")
-                        .frame(maxWidth: .infinity)
-                }
-                .controlSize(.large)
-                .confirmationDialog(
-                    "Delete this transaction?",
-                    isPresented: $showDeleteConfirmation,
-                    titleVisibility: .visible
-                ) {
-                    Button("Delete", role: .destructive) {
-                        viewModel.deleteTransaction(context: context)
-                        onSave()
-                        dismiss()
-                    }
-                } message: {
-                    Text("This action cannot be undone.")
-                }
-            }
+        } message: {
+            Text("This action cannot be undone.")
         }
-        .padding(.horizontal)
     }
 }

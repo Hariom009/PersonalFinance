@@ -57,9 +57,9 @@ struct ProgressTimelineView: View {
 
                     // Personal best flag
                     if personalBest > 0 && personalBestFraction < 1.0 {
-                        VStack(spacing: 2) {
+                        VStack(spacing: AppSpacing.xxs) {
                             Image(systemName: "flag.fill")
-                                .font(.system(size: 11))
+                                .font(.system(size: 14))
                                 .foregroundStyle(.orange)
 
                             Rectangle()
@@ -89,21 +89,21 @@ struct ProgressTimelineView: View {
             // Labels
             HStack {
                 Text("Start")
-                    .font(.caption2)
+                    .font(.caption)
                     .foregroundStyle(.secondary)
 
                 Spacer()
 
                 if personalBest > 0 {
                     Text("Best: \(personalBest)d")
-                        .font(.caption2.weight(.medium))
+                        .font(.caption.weight(.medium))
                         .foregroundStyle(.orange)
                 }
 
                 Spacer()
 
                 Text("Day \(targetDays)")
-                    .font(.caption2)
+                    .font(.caption)
                     .foregroundStyle(.secondary)
             }
         }

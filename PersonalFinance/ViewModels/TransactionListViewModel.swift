@@ -1,6 +1,33 @@
 import Foundation
 import SwiftData
 
+enum DateFilter: String, CaseIterable, Identifiable {
+    case all      = "All Time"
+    case today    = "Today"
+    case week     = "This Week"
+    case month    = "This Month"
+    case custom   = "Custom"
+
+    var id: String { rawValue }
+
+    var dateRange: (start: Date, end: Date)? {
+        let calendar = Calendar.current
+        let now = Date.now
+        switch self {
+        case .all:
+            return nil
+        case .today:
+            return (now.startOfDay, now)
+        case .week:
+            return (now.startOfWeek, now)
+        case .month:
+            return (now.startOfMonth, now)
+        case .custom:
+            return nil
+        }
+    }
+}
+
 @Observable
 final class TransactionListViewModel {
     var transactions: [Transaction] = []
@@ -8,6 +35,9 @@ final class TransactionListViewModel {
     var searchText: String = ""
     var selectedTypeFilter: TransactionType? = nil
     var selectedCategoryFilter: Category? = nil
+    var selectedDateFilter: DateFilter = .all
+    var customDateFrom: Date = Calendar.current.date(byAdding: .month, value: -1, to: .now) ?? .now
+    var customDateTo: Date = .now
     var transactionToEdit: Transaction? = nil
     var showingAddSheet: Bool = false
 
@@ -45,8 +75,19 @@ final class TransactionListViewModel {
         return ((monthlyExpenses - lastMonthExpenses) / lastMonthExpenses) * 100
     }
 
+    var activeDateRange: (start: Date, end: Date)? {
+        if selectedDateFilter == .custom {
+            return (customDateFrom.startOfDay, Calendar.current.date(byAdding: .day, value: 1, to: customDateTo.startOfDay) ?? customDateTo)
+        }
+        return selectedDateFilter.dateRange
+    }
+
     var filteredTransactions: [Transaction] {
         var result = transactions
+
+        if let range = activeDateRange {
+            result = result.filter { $0.date >= range.start && $0.date <= range.end }
+        }
 
         if let type = selectedTypeFilter {
             result = result.filter { $0.type == type }
@@ -104,6 +145,7 @@ final class TransactionListViewModel {
     func clearFilters() {
         selectedTypeFilter = nil
         selectedCategoryFilter = nil
+        selectedDateFilter = .all
         searchText = ""
     }
 }

@@ -63,6 +63,10 @@ struct BudgetFillCard: View {
         progress > 0.01 ? 3.0 : 0
     }
 
+    private var fillGreen: Color {
+        colorScheme == .dark ? Color(hex: "3AFF6D") : .green
+    }
+
     // Blended gradient: green base → orange mid → red top, weighted by progress
     // As progress rises, orange and red become more visible at the surface.
     private var fluidGradient: LinearGradient {
@@ -71,8 +75,8 @@ struct BudgetFillCard: View {
 
         return LinearGradient(
             stops: [
-                .init(color: Color.green.opacity(heavyFill), location: 0),
-                .init(color: Color.green.opacity(lightFill), location: 0.45),
+                .init(color: fillGreen.opacity(heavyFill), location: 0),
+                .init(color: fillGreen.opacity(lightFill), location: 0.45),
                 .init(color: Color.orange.opacity(lightFill * orangeAmount), location: 0.7),
                 .init(color: Color.red.opacity(heavyFill * redAmount), location: 1.0)
             ],
@@ -87,8 +91,8 @@ struct BudgetFillCard: View {
 
         return LinearGradient(
             stops: [
-                .init(color: Color.green.opacity(heavyFill), location: 0),
-                .init(color: Color.green.opacity(heavyFill), location: 0.5),
+                .init(color: fillGreen.opacity(heavyFill), location: 0),
+                .init(color: fillGreen.opacity(heavyFill), location: 0.5),
                 .init(color: Color.orange.opacity(heavyFill * orangeAmount), location: 0.75),
                 .init(color: Color.red.opacity(heavyFill * redAmount), location: 1.0)
             ],
@@ -98,29 +102,29 @@ struct BudgetFillCard: View {
     }
 
     var body: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: AppSpacing.sm) {
             HStack {
                 Text("Budget")
-                    .font(.system(.subheadline, design: .serif).weight(.medium))
+                    .font(.system(.headline, design: .serif).weight(.medium))
 
                 Spacer()
 
                 Text("\(Int(min(percent, 1.0) * 100))% used")
-                    .font(.caption.weight(.medium))
+                    .font(.footnote.weight(.medium))
                     .foregroundStyle(statusColor)
             }
 
             HStack {
                 Text(spent.asCurrency)
-                    .font(.system(.caption2, design: .rounded).weight(.medium))
+                    .font(.system(.caption, design: .rounded).weight(.medium))
                     .foregroundStyle(.secondary)
                 Spacer()
                 Text(limit.asCurrency)
-                    .font(.system(.caption2, design: .rounded))
+                    .font(.system(.caption, design: .rounded))
                     .foregroundStyle(.secondary)
             }
         }
-        .padding(14)
+        .padding(AppSize.cardPadding)
         .background {
             ZStack {
                 RoundedRectangle(cornerRadius: 14)

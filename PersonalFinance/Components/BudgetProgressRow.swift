@@ -25,15 +25,15 @@ struct BudgetProgressRow: View {
     }
 
     var body: some View {
-        VStack(spacing: 8) {
-            HStack(spacing: 10) {
+        VStack(spacing: AppSpacing.sm) {
+            HStack(spacing: AppSpacing.md) {
                 ZStack {
                     Circle()
                         .fill(category.color.opacity(0.15))
-                        .frame(width: 36, height: 36)
+                        .frame(width: AppSize.iconContainerMedium, height: AppSize.iconContainerMedium)
 
                     Image(systemName: category.iconName)
-                        .font(.system(size: 14))
+                        .font(.system(size: AppSize.iconSmall))
                         .foregroundStyle(category.color)
                 }
 
@@ -43,7 +43,7 @@ struct BudgetProgressRow: View {
                 Spacer()
 
                 Text("\(spent.asCurrency) / \(limit.asCurrency)")
-                    .font(.system(.caption, design: .rounded))
+                    .font(.system(.footnote, design: .rounded))
                     .foregroundStyle(.secondary)
             }
 
@@ -64,13 +64,13 @@ struct BudgetProgressRow: View {
                 HStack {
                     Spacer()
                     Text("Over by \((spent - limit).asCurrency)")
-                        .font(.system(.caption2, design: .rounded))
+                        .font(.system(.caption, design: .rounded))
                         .foregroundStyle(.expenseRed)
                         .modifier(ShakeEffect(amount: shakeAmount))
                 }
             }
         }
-        .padding(14)
+        .padding(AppSize.cardPadding)
         .background(Color.cardBackground)
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .onAppear {

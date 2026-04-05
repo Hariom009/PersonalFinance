@@ -56,7 +56,7 @@ struct ChallengeView: View {
 
             VStack(spacing: 12) {
                 Text("Target Days")
-                    .font(.caption)
+                    .font(.footnote)
                     .foregroundStyle(.secondary)
 
                 PresetChipRow(selectedPreset: $viewModel.selectedPreset) { preset in
@@ -177,15 +177,15 @@ struct ChallengeView: View {
             HStack(spacing: 16) {
                 HStack(spacing: 6) {
                     Circle().fill(Color.incomeGreen).frame(width: 10, height: 10)
-                    Text("No spend").font(.caption2).foregroundStyle(.secondary)
+                    Text("No spend").font(.caption).foregroundStyle(.secondary)
                 }
                 HStack(spacing: 6) {
                     Circle().fill(Color.expenseRed.opacity(0.7)).frame(width: 10, height: 10)
-                    Text("Spent").font(.caption2).foregroundStyle(.secondary)
+                    Text("Spent").font(.caption).foregroundStyle(.secondary)
                 }
                 HStack(spacing: 6) {
                     Circle().strokeBorder(.secondary.opacity(0.3), lineWidth: 1).frame(width: 10, height: 10)
-                    Text("Future").font(.caption2).foregroundStyle(.secondary)
+                    Text("Future").font(.caption).foregroundStyle(.secondary)
                 }
             }
         }
@@ -204,11 +204,11 @@ struct ChallengeView: View {
                 ForEach(Category.expenseCategories) { category in
                     let isExempt = viewModel.exemptCategories.contains(category)
 
-                    VStack(spacing: 4) {
+                    VStack(spacing: AppSpacing.xs) {
                         Image(systemName: category.iconName)
-                            .font(.system(size: 14))
+                            .font(.system(size: AppSize.iconSmall))
                         Text(category.title)
-                            .font(.system(.caption2, design: .rounded).weight(.medium))
+                            .font(.system(.caption, design: .rounded).weight(.medium))
                             .lineLimit(1)
                             .minimumScaleFactor(0.8)
                     }

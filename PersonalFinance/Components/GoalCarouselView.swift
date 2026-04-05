@@ -9,13 +9,19 @@ private final class SwipeSoundPlayer: @unchecked Sendable {
     init() {
         guard let url = Bundle.main.url(forResource: "swipe_sound", withExtension: "mp3") else { return }
         player = try? AVAudioPlayer(contentsOf: url)
+        player?.volume = 0.9
         player?.prepareToPlay()
     }
 
     func play() {
         queue.async { [weak self] in
-            self?.player?.currentTime = 0
-            self?.player?.play()
+            guard let self, let player = self.player else { return }
+            player.currentTime = 0
+            player.play()
+            // Stop playback after a short duration
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                player.stop()
+            }
         }
     }
 }
@@ -32,9 +38,9 @@ struct GoalCarouselView: View {
     @State private var appeared: Bool = false
     private let soundPlayer = SwipeSoundPlayer()
 
-    private let cardWidth: CGFloat = 190
-    private let cardHeight: CGFloat = 276
-    private let exposedWidth: CGFloat = 62
+    private let cardWidth: CGFloat = 210
+    private let cardHeight: CGFloat = 290
+    private let exposedWidth: CGFloat = 68
 
     var body: some View {
         VStack(spacing: 16) {

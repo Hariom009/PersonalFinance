@@ -280,7 +280,7 @@ struct DashboardView: View {
                             .foregroundStyle(.orange)
                         Text("\(viewModel.challengeStreak)")
                             .font(.system(size: 14, weight: .bold, design: .rounded))
-                            .foregroundStyle(.primary)
+                            .foregroundStyle(Color(UIColor.label))
                     }
                     .padding(.horizontal, 12)
                     .padding(.vertical, 8)
@@ -295,7 +295,7 @@ struct DashboardView: View {
             } label: {
                 Image(systemName: "gearshape")
                     .font(.body)
-                    .foregroundStyle(.primary)
+                    .foregroundStyle(Color(UIColor.label))
                     .padding(8)
                     .background(Color.cardBackground)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
@@ -320,7 +320,7 @@ struct DashboardView: View {
                 )
 
                 Text("this month")
-                    .font(.caption)
+                    .font(.footnote)
                     .foregroundStyle(.tertiary)
             }
         }
@@ -425,14 +425,14 @@ struct DashboardView: View {
                         if let anchor = proxy.position(forX: selectedDay) {
                             let xPos = anchor + geo[proxy.plotFrame!].origin.x
 
-                            VStack(spacing: 2) {
+                            VStack(spacing: AppSpacing.xxs) {
                                 Text(dayData.amount.asCurrency)
-                                    .font(.system(.caption, design: .rounded).weight(.semibold))
+                                    .font(.system(.footnote, design: .rounded).weight(.semibold))
                                 Text(dayData.day)
-                                    .font(.caption2)
+                                    .font(.caption)
                                     .foregroundStyle(.secondary)
                             }
-                            .padding(8)
+                            .padding(AppSpacing.sm)
                             .background(Color.cardBackground)
                             .clipShape(RoundedRectangle(cornerRadius: 8))
                             .shadow(color: .black.opacity(0.1), radius: 4)
@@ -449,7 +449,7 @@ struct DashboardView: View {
                     AxisValueLabel {
                         if let amount = value.as(Double.self) {
                             Text(amount.asCurrency)
-                                .font(.caption2)
+                                .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
                     }
@@ -462,7 +462,7 @@ struct DashboardView: View {
                 }
             }
         }
-        .padding(14)
+        .padding(AppSize.cardPadding)
         .background(Color.cardBackground)
         .clipShape(RoundedRectangle(cornerRadius: 14))
         .shadow(color: .black.opacity(0.04), radius: 6, x: 0, y: 2)
@@ -493,13 +493,13 @@ struct DashboardView: View {
                     }
                     .frame(height: 140)
 
-                    VStack(spacing: 2) {
+                    VStack(spacing: AppSpacing.xxs) {
                         Text(viewModel.totalMonthlyExpenses.asCurrency)
                             .font(.system(.subheadline, design: .rounded).weight(.bold))
                             .opacity(donutProgress > 0.5 ? 1 : 0)
                             .animation(.easeIn(duration: 0.3), value: donutProgress > 0.5)
                         Text("total")
-                            .font(.caption2)
+                            .font(.caption)
                             .foregroundStyle(.secondary)
                             .opacity(donutProgress > 0.5 ? 1 : 0)
                             .animation(.easeIn(duration: 0.3), value: donutProgress > 0.5)
@@ -528,14 +528,14 @@ struct DashboardView: View {
                             .frame(width: 8, height: 8)
 
                         Text(item.category.title)
-                            .font(.caption2)
+                            .font(.caption)
                             .foregroundStyle(.primary)
                             .lineLimit(1)
 
                         Spacer()
 
                         Text("\(Int(item.percentage * 100))%")
-                            .font(.caption2)
+                            .font(.caption)
                             .foregroundStyle(.secondary)
                     }
                 }
@@ -580,7 +580,7 @@ struct DashboardView: View {
                     showAddGoal = true
                 } label: {
                     Label("Add Goal", systemImage: "plus.circle")
-                        .font(.caption.weight(.medium))
+                        .font(.footnote.weight(.medium))
                         .foregroundStyle(.appPrimary)
                 }
                 .frame(maxWidth: .infinity, alignment: .trailing)
@@ -640,17 +640,17 @@ struct DashboardView: View {
     // MARK: - Empty State Helper
 
     private func emptyStateView(icon: String, message: String, subtitle: String) -> some View {
-        VStack(spacing: 6) {
+        VStack(spacing: AppSpacing.sm) {
             Image(systemName: icon)
-                .font(.system(size: 24))
+                .font(.system(size: 28))
                 .foregroundStyle(.secondary.opacity(0.5))
 
             Text(message)
-                .font(.caption.weight(.medium))
+                .font(.footnote.weight(.medium))
                 .foregroundStyle(.secondary)
 
             Text(subtitle)
-                .font(.caption2)
+                .font(.caption)
                 .foregroundStyle(.tertiary)
                 .multilineTextAlignment(.center)
         }

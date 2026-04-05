@@ -79,7 +79,7 @@ struct SettingsView: View {
 
             if !BiometricService.isBiometricAvailable {
                 Text("Biometric authentication is not available on this device.")
-                    .font(.caption)
+                    .font(.footnote)
                     .foregroundStyle(.secondary)
             }
         } header: {

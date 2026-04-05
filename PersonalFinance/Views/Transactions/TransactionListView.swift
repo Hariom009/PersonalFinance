@@ -9,6 +9,7 @@ struct TransactionListView: View {
     @State private var hasAppeared = false
     @State private var isFabVisible = true
     @State private var lastScrollOffset: CGFloat = 0
+    @State private var showingCustomDatePicker = false
 
     var body: some View {
         NavigationStack {
@@ -76,6 +77,9 @@ struct TransactionListView: View {
             } message: {
                 Text("This action cannot be undone.")
             }
+            .sheet(isPresented: $showingCustomDatePicker) {
+                customDatePickerSheet
+            }
         }
     }
 
@@ -83,74 +87,114 @@ struct TransactionListView: View {
 
     private var summaryCard: some View {
         VStack(spacing: 10) {
-            HStack {
-                VStack(spacing: 2) {
-                    Text("Income")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                    Text(viewModel.monthlyIncome.asCurrency)
-                        .font(.system(.subheadline, design: .rounded).weight(.semibold))
+            // MARK: Income & Expenses row
+            HStack(spacing: 0) {
+                HStack(spacing: 8) {
+                    Image(systemName: "arrow.down.circle.fill")
+                        .font(.system(size: 22))
                         .foregroundStyle(.incomeGreen)
-                        .contentTransition(.numericText())
-                        .animation(.easeInOut(duration: 0.3), value: viewModel.monthlyIncome)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Income")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        Text(viewModel.monthlyIncome.asCurrency)
+                            .font(.system(.callout, design: .rounded).weight(.bold))
+                            .contentTransition(.numericText())
+                            .animation(.easeInOut(duration: 0.3), value: viewModel.monthlyIncome)
+                    }
                 }
-                .frame(maxWidth: .infinity)
+                .frame(maxWidth: .infinity, alignment: .leading)
 
-                Divider()
-                    .frame(height: 30)
-
-                VStack(spacing: 2) {
-                    Text("Expenses")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                    Text(viewModel.monthlyExpenses.asCurrency)
-                        .font(.system(.subheadline, design: .rounded).weight(.semibold))
+                HStack(spacing: 8) {
+                    Image(systemName: "arrow.up.circle.fill")
+                        .font(.system(size: 22))
                         .foregroundStyle(.expenseRed)
-                        .contentTransition(.numericText())
-                        .animation(.easeInOut(duration: 0.3), value: viewModel.monthlyExpenses)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Expenses")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        Text(viewModel.monthlyExpenses.asCurrency)
+                            .font(.system(.callout, design: .rounded).weight(.bold))
+                            .contentTransition(.numericText())
+                            .animation(.easeInOut(duration: 0.3), value: viewModel.monthlyExpenses)
+                    }
                 }
-                .frame(maxWidth: .infinity)
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
 
-            Divider()
+            // MARK: Spending ratio bar
+            GeometryReader { geo in
+                let total = viewModel.monthlyIncome + viewModel.monthlyExpenses
+                let expenseRatio = total > 0 ? viewModel.monthlyExpenses / total : 0
+                ZStack(alignment: .leading) {
+                    Capsule()
+                        .fill(Color.incomeGreen.opacity(0.18))
+                    Capsule()
+                        .fill(
+                            LinearGradient(
+                                colors: [.expenseRed.opacity(0.7), .expenseRed],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                        .frame(width: geo.size.width * expenseRatio)
+                        .animation(.easeInOut(duration: 0.5), value: expenseRatio)
+                }
+            }
+            .frame(height: 5)
 
-            HStack {
-                VStack(spacing: 2) {
+            // MARK: Net Balance & Trend row
+            HStack(alignment: .bottom) {
+                VStack(alignment: .leading, spacing: 2) {
                     Text("Net Balance")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                     Text(viewModel.netBalance.asCurrency)
-                        .font(.system(.subheadline, design: .rounded).weight(.semibold))
+                        .font(.system(.title3, design: .rounded).weight(.bold))
                         .foregroundStyle(viewModel.netBalance >= 0 ? .incomeGreen : .expenseRed)
                         .contentTransition(.numericText())
                         .animation(.easeInOut(duration: 0.3), value: viewModel.netBalance)
                 }
-                .frame(maxWidth: .infinity)
 
-                Divider()
-                    .frame(height: 30)
+                Spacer()
 
-                VStack(spacing: 2) {
-                    Text("vs Last Month")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                    HStack(spacing: 3) {
-                        Image(systemName: trendIconName)
-                            .font(.system(size: 10, weight: .bold))
-                        Text(String(format: "%.0f%%", abs(viewModel.spendingTrendPercent)))
-                            .font(.system(.subheadline, design: .rounded).weight(.semibold))
-                    }
-                    .foregroundStyle(trendColor)
+                HStack(spacing: 4) {
+                    Image(systemName: trendIconName)
+                        .font(.system(size: 11, weight: .bold))
+                    Text("vs last mo.")
+                        .font(.system(.caption2, design: .rounded))
+                    Text(String(format: "%.0f%%", abs(viewModel.spendingTrendPercent)))
+                        .font(.system(.caption, design: .rounded).weight(.bold))
                 }
-                .frame(maxWidth: .infinity)
+                .foregroundStyle(trendColor)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 5)
+                .background(trendColor.opacity(0.12))
+                .clipShape(Capsule())
             }
         }
         .padding(14)
-        .background(Color.cardBackground)
-        .clipShape(RoundedRectangle(cornerRadius: 14))
-        .shadow(color: .black.opacity(0.04), radius: 6, x: 0, y: 2)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color.cardBackground)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(
+                            LinearGradient(
+                                colors: [Color.appPrimary.opacity(0.08), Color.clear],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                )
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(Color.appPrimary.opacity(0.12), lineWidth: 1)
+        )
+        .shadow(color: .black.opacity(0.06), radius: 8, x: 0, y: 3)
         .padding(.horizontal, 16)
-        .padding(.top, 8)
+        .padding(.top, 4)
         .scaleEntrance(appeared: hasAppeared, delay: 0.05, reduceMotion: reduceMotion)
     }
 
@@ -169,61 +213,135 @@ struct TransactionListView: View {
     // MARK: - Filter Chips
 
     private var filterChips: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 8) {
-                FilterChipView(
-                    label: "All",
-                    isSelected: viewModel.selectedTypeFilter == nil
-                ) {
-                    viewModel.selectedTypeFilter = nil
-                }
-
-                FilterChipView(
-                    label: "Income",
-                    isSelected: viewModel.selectedTypeFilter == .income
-                ) {
-                    viewModel.selectedTypeFilter = .income
-                }
-
-                FilterChipView(
-                    label: "Expense",
-                    isSelected: viewModel.selectedTypeFilter == .expense
-                ) {
-                    viewModel.selectedTypeFilter = .expense
-                }
-
-                Divider()
-                    .frame(height: 20)
-
-                Menu {
-                    Button("All Categories") {
-                        viewModel.selectedCategoryFilter = nil
+        ScrollViewReader { proxy in
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    FilterChipView(
+                        label: "All",
+                        isSelected: viewModel.selectedTypeFilter == nil
+                    ) {
+                        viewModel.selectedTypeFilter = nil
                     }
+                    .id("filter_all")
+
+                    FilterChipView(
+                        label: "Income",
+                        isSelected: viewModel.selectedTypeFilter == .income
+                    ) {
+                        viewModel.selectedTypeFilter = .income
+                    }
+                    .id("filter_income")
+
+                    FilterChipView(
+                        label: "Expense",
+                        isSelected: viewModel.selectedTypeFilter == .expense
+                    ) {
+                        viewModel.selectedTypeFilter = .expense
+                    }
+                    .id("filter_expense")
+
                     Divider()
-                    ForEach(Category.allCases) { category in
-                        Button {
-                            viewModel.selectedCategoryFilter = category
-                        } label: {
-                            Label(category.title, systemImage: category.iconName)
+                        .frame(height: 20)
+
+                    Menu {
+                        Button("All Categories") {
+                            viewModel.selectedCategoryFilter = nil
                         }
+                        Divider()
+                        ForEach(Category.allCases) { category in
+                            Button {
+                                viewModel.selectedCategoryFilter = category
+                            } label: {
+                                Label(category.title, systemImage: category.iconName)
+                            }
+                        }
+                    } label: {
+                        HStack(spacing: AppSpacing.xs) {
+                            Text(viewModel.selectedCategoryFilter?.title ?? "Category")
+                                .font(.subheadline.weight(.medium))
+                            Image(systemName: "chevron.down")
+                                .font(.caption)
+                        }
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 8)
+                        .foregroundStyle(viewModel.selectedCategoryFilter != nil ? .white : .primary)
+                        .background(viewModel.selectedCategoryFilter != nil ? Color.appPrimary : Color.cardBackground)
+                        .clipShape(Capsule())
                     }
-                } label: {
-                    HStack(spacing: 4) {
-                        Text(viewModel.selectedCategoryFilter?.title ?? "Category")
-                            .font(.subheadline.weight(.medium))
-                        Image(systemName: "chevron.down")
-                            .font(.caption2)
+                    .id("filter_category")
+
+                    Divider()
+                        .frame(height: 20)
+
+                    Menu {
+                        ForEach(DateFilter.allCases) { filter in
+                            Button {
+                                if filter == .custom {
+                                    showingCustomDatePicker = true
+                                }
+                                viewModel.selectedDateFilter = filter
+                            } label: {
+                                HStack {
+                                    Text(filter.rawValue)
+                                    if viewModel.selectedDateFilter == filter {
+                                        Image(systemName: "checkmark")
+                                    }
+                                }
+                            }
+                        }
+                    } label: {
+                        HStack(spacing: AppSpacing.xs) {
+                            Image(systemName: "calendar")
+                                .font(.caption)
+                            Text(dateFilterLabel)
+                                .font(.subheadline.weight(.medium))
+                            Image(systemName: "chevron.down")
+                                .font(.caption)
+                        }
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 8)
+                        .foregroundStyle(viewModel.selectedDateFilter != .all ? .white : .primary)
+                        .background(viewModel.selectedDateFilter != .all ? Color.appPrimary : Color.cardBackground)
+                        .clipShape(Capsule())
                     }
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 8)
-                    .foregroundStyle(viewModel.selectedCategoryFilter != nil ? .white : .primary)
-                    .background(viewModel.selectedCategoryFilter != nil ? Color.appPrimary : Color.cardBackground)
-                    .clipShape(Capsule())
+                    .id("filter_date")
+                }
+                .padding(.horizontal)
+            }
+            .padding(.vertical, 4)
+            .onChange(of: viewModel.selectedTypeFilter) {
+                withAnimation {
+                    if let type = viewModel.selectedTypeFilter {
+                        proxy.scrollTo("filter_\(type.rawValue.lowercased())", anchor: .center)
+                    } else {
+                        proxy.scrollTo("filter_all", anchor: .center)
+                    }
                 }
             }
-            .padding(.horizontal)
+            .onChange(of: viewModel.selectedCategoryFilter) {
+                withAnimation {
+                    proxy.scrollTo("filter_category", anchor: .center)
+                }
+            }
+            .onChange(of: viewModel.selectedDateFilter) {
+                withAnimation {
+                    proxy.scrollTo("filter_date", anchor: .center)
+                }
+            }
         }
-        .padding(.vertical, 8)
+    }
+
+    private var dateFilterLabel: String {
+        switch viewModel.selectedDateFilter {
+        case .all:
+            return "Date"
+        case .custom:
+            let formatter = DateFormatter()
+            formatter.dateFormat = "MMM d"
+            return "\(formatter.string(from: viewModel.customDateFrom)) – \(formatter.string(from: viewModel.customDateTo))"
+        default:
+            return viewModel.selectedDateFilter.rawValue
+        }
     }
 
     // MARK: - Transaction List
@@ -286,6 +404,7 @@ struct TransactionListView: View {
                         expenses: group.sectionExpenses
                     )
                 }
+                .headerProminence(.increased)
             }
         }
         .listStyle(.plain)
@@ -300,19 +419,20 @@ struct TransactionListView: View {
         }
         .animation(.easeInOut(duration: 0.25), value: viewModel.selectedTypeFilter)
         .animation(.easeInOut(duration: 0.25), value: viewModel.selectedCategoryFilter)
+        .animation(.easeInOut(duration: 0.25), value: viewModel.selectedDateFilter)
     }
 
     // MARK: - Section Header
 
     private func transactionSectionHeader(title: String, income: Double, expenses: Double) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: AppSpacing.xs) {
             HStack(alignment: .firstTextBaseline, spacing: 6) {
                 Text(title)
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(.primary)
+                    .font(.headline)
+                    .foregroundColor(Color(.label))
 
                 Text("—")
-                    .foregroundStyle(.tertiary)
+                    .foregroundColor(Color(.label))
 
                 Group {
                     if income > 0 && expenses > 0 {
@@ -323,8 +443,8 @@ struct TransactionListView: View {
                         Text("\(income.asCurrency) earned")
                     }
                 }
-                .font(.caption)
-                .foregroundStyle(.secondary)
+                .font(.subheadline.weight(.regular))
+                .foregroundColor(Color(.label))
 
                 Spacer()
             }
@@ -339,8 +459,9 @@ struct TransactionListView: View {
                 )
                 .frame(height: 1)
         }
-        .padding(.top, 8)
-        .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 4, trailing: 16))
+        .padding(.top, 4)
+        .textCase(nil)
+        .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 2, trailing: 16))
     }
 
     // MARK: - Floating Action Button
@@ -366,6 +487,41 @@ struct TransactionListView: View {
             value: isFabVisible
         )
         .scaleEntrance(appeared: hasAppeared, delay: 0.4, reduceMotion: reduceMotion)
+    }
+
+    // MARK: - Custom Date Picker Sheet
+
+    private var customDatePickerSheet: some View {
+        NavigationStack {
+            VStack(spacing: 20) {
+                DatePicker(
+                    "From",
+                    selection: $viewModel.customDateFrom,
+                    in: ...viewModel.customDateTo,
+                    displayedComponents: .date
+                )
+
+                DatePicker(
+                    "To",
+                    selection: $viewModel.customDateTo,
+                    in: viewModel.customDateFrom...,
+                    displayedComponents: .date
+                )
+
+                Spacer()
+            }
+            .padding()
+            .navigationTitle("Custom Date Range")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") {
+                        showingCustomDatePicker = false
+                    }
+                }
+            }
+        }
+        .presentationDetents([.medium])
     }
 }
 

@@ -30,12 +30,12 @@ struct NeedsAttentionCard: View {
     }
 
     var body: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: AppSpacing.md) {
             // Pulsing icon
             ZStack {
                 Circle()
                     .fill(statusColor.opacity(0.15))
-                    .frame(width: 36, height: 36)
+                    .frame(width: AppSize.iconContainerMedium, height: AppSize.iconContainerMedium)
                     .scaleEffect(appeared && !reduceMotion ? 1.08 : 1.0)
                     .animation(
                         reduceMotion ? .none :
@@ -44,16 +44,16 @@ struct NeedsAttentionCard: View {
                     )
 
                 Image(systemName: category.iconName)
-                    .font(.system(size: 15))
+                    .font(.system(size: 18))
                     .foregroundStyle(statusColor)
             }
 
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: AppSpacing.xxs) {
                 Text(category.title)
                     .font(.subheadline.weight(.medium))
 
                 Text(statusText)
-                    .font(.caption)
+                    .font(.footnote)
                     .foregroundStyle(statusColor)
             }
 
@@ -63,7 +63,7 @@ struct NeedsAttentionCard: View {
                 .font(.system(.subheadline, design: .rounded).weight(.bold))
                 .foregroundStyle(statusColor)
         }
-        .padding(12)
+        .padding(AppSize.cardPadding)
         .background(Color.cardBackground)
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .overlay(

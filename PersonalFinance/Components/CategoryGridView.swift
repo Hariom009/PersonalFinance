@@ -29,21 +29,21 @@ private struct CategoryCell: View {
     let isSelected: Bool
 
     var body: some View {
-        VStack(spacing: 6) {
+        VStack(spacing: AppSpacing.sm) {
             ZStack {
                 Circle()
-                    .fill(category.color.opacity(isSelected ? 1.0 : 0.15))
-                    .frame(width: 44, height: 44)
+                    .fill(category.color.opacity(isSelected ? 1.0 : 0.05))
+                    .frame(width: 48, height: 48)
 
                 Image(systemName: category.iconName)
-                    .font(.system(size: 18))
+                    .font(.system(size: AppSize.iconMedium))
                     .foregroundStyle(isSelected ? .white : category.color)
             }
             .scaleEffect(isSelected ? 1.1 : 1.0)
             .animation(.easeInOut(duration: 0.2), value: isSelected)
 
             Text(category.title)
-                .font(.caption2)
+                .font(.caption)
                 .lineLimit(1)
                 .foregroundStyle(isSelected ? .primary : .secondary)
         }

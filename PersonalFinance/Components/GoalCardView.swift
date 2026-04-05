@@ -7,14 +7,14 @@ struct GoalCardView: View {
     @State private var animatedProgress: Double = 0
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: AppSpacing.md) {
             ZStack {
                 Circle()
                     .fill(Color.decorativeIconBg)
-                    .frame(width: 40, height: 40)
+                    .frame(width: 44, height: 44)
 
                 Image(systemName: goal.iconName)
-                    .font(.system(size: 16))
+                    .font(.system(size: 18))
                     .foregroundStyle(.secondary)
             }
 
@@ -36,12 +36,12 @@ struct GoalCardView: View {
             .frame(height: 6)
 
             Text("\(goal.currentAmount.asCurrency) of \(goal.targetAmount.asCurrency)")
-                .font(.system(.caption2, design: .rounded))
+                .font(.system(.caption, design: .rounded))
                 .foregroundStyle(.secondary)
                 .lineLimit(1)
         }
-        .padding(14)
-        .frame(width: 160)
+        .padding(AppSize.cardPadding)
+        .frame(width: 170)
         .background(Color.cardBackground)
         .clipShape(RoundedRectangle(cornerRadius: 14))
         .shadow(color: .black.opacity(0.04), radius: 8, x: 0, y: 2)

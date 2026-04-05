@@ -22,7 +22,7 @@ struct LockScreenView: View {
 
             if authFailed {
                 Text("Authentication failed. Try again.")
-                    .font(.caption)
+                    .font(.footnote)
                     .foregroundStyle(.expenseRed)
             }
 

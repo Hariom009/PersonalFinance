@@ -8,13 +8,13 @@ struct SectionHeaderView: View {
 
     var body: some View {
         HStack(alignment: .firstTextBaseline) {
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: AppSpacing.xxs) {
                 Text(title)
-                    .font(.system(.subheadline, design: .serif).weight(.semibold))
+                    .font(.system(.headline, design: .serif).weight(.semibold))
 
                 if let subtitle {
                     Text(subtitle)
-                        .font(.caption)
+                        .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }
             }

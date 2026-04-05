@@ -156,30 +156,30 @@ struct GoalsListView: View {
 
             VStack(alignment: .leading, spacing: 6) {
                 Text("Total Savings")
-                    .font(.system(.caption, design: .serif).weight(.medium))
+                    .font(.system(.footnote, design: .serif).weight(.medium))
                     .foregroundStyle(.secondary)
 
                 Text("\(viewModel.totalSaved.asCurrency)")
                     .font(.system(.title3, design: .rounded).weight(.bold))
 
                 Text("of \(viewModel.totalTarget.asCurrency)")
-                    .font(.system(.caption2, design: .rounded))
+                    .font(.system(.caption, design: .rounded))
                     .foregroundStyle(.secondary)
 
                 HStack(spacing: 12) {
                     Label("\(viewModel.activeGoals.count) active", systemImage: "flame.fill")
-                        .font(.system(size: 10, weight: .medium))
+                        .font(.system(size: 12, weight: .medium))
                         .foregroundStyle(.secondary)
 
                     if !viewModel.completedGoals.isEmpty {
                         Label("\(viewModel.completedGoals.count) done", systemImage: "checkmark.circle.fill")
-                            .font(.system(size: 10, weight: .medium))
+                            .font(.system(size: 12, weight: .medium))
                             .foregroundStyle(.incomeGreen)
                     }
                 }
 
                 Text(motivationalMessage)
-                    .font(.system(size: 10, weight: .medium, design: .serif))
+                    .font(.system(size: 12, weight: .medium, design: .serif))
                     .foregroundStyle(.appPrimary)
                     .italic()
             }
@@ -225,12 +225,12 @@ struct GoalsListView: View {
                     .foregroundStyle(.incomeGreen)
             }
 
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: AppSpacing.xs) {
                 Text(goal.name)
                     .font(.subheadline.weight(.medium))
 
                 Text(goal.targetAmount.asCurrency)
-                    .font(.system(.caption, design: .rounded).weight(.semibold))
+                    .font(.system(.footnote, design: .rounded).weight(.semibold))
                     .foregroundStyle(.incomeGreen)
             }
 
@@ -238,7 +238,7 @@ struct GoalsListView: View {
 
             // "Achieved" badge
             Text("Achieved")
-                .font(.system(size: 10, weight: .semibold))
+                .font(.system(size: 12, weight: .semibold))
                 .foregroundStyle(.incomeGreen)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 4)

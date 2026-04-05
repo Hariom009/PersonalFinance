@@ -1,0 +1,12 @@
+# Documentation
+Docs/
+*.md
+!README.md
+
+# Design references
+*.fig
+*.sketch
+*.xd
+*.psd
+*.ai
+*.pdf

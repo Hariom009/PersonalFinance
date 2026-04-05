@@ -7,9 +7,9 @@ struct StatCardView: View {
     let color: Color
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: AppSpacing.sm) {
             Image(systemName: icon)
-                .font(.system(size: 12, weight: .semibold))
+                .font(.system(size: AppSize.iconSmall, weight: .semibold))
                 .foregroundStyle(color)
 
             Text(amount.asCurrency)
@@ -18,10 +18,10 @@ struct StatCardView: View {
                 .minimumScaleFactor(0.7)
 
             Text(label)
-                .font(.caption2)
+                .font(.caption)
                 .foregroundStyle(.secondary)
         }
-        .padding(12)
+        .padding(AppSize.cardPadding)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color.cardBackground)
         .clipShape(RoundedRectangle(cornerRadius: 12))

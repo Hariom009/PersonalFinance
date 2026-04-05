@@ -14,7 +14,7 @@ struct StreakCalendarView: View {
             HStack(spacing: 8) {
                 ForEach(weekdayLabels.indices, id: \.self) { i in
                     Text(weekdayLabels[i])
-                        .font(.system(size: 10, weight: .medium))
+                        .font(.system(size: 12, weight: .medium))
                         .foregroundStyle(.secondary)
                         .frame(maxWidth: .infinity)
                 }
@@ -56,24 +56,24 @@ struct StreakCalendarView: View {
             if day.isFuture {
                 Circle()
                     .strokeBorder(.secondary.opacity(0.2), lineWidth: 1)
-                    .frame(width: 28, height: 28)
+                    .frame(width: 32, height: 32)
             } else if day.isToday {
                 Circle()
                     .fill(day.didSpend ? Color.expenseRed.opacity(0.7) : greenForStreak(day.consecutiveNoSpendDays))
-                    .frame(width: 28, height: 28)
+                    .frame(width: 32, height: 32)
                     .overlay(
                         Circle()
                             .strokeBorder(Color.primary, lineWidth: 2)
-                            .frame(width: 32, height: 32)
+                            .frame(width: 36, height: 36)
                     )
             } else {
                 Circle()
                     .fill(day.didSpend ? Color.expenseRed.opacity(0.7) : greenForStreak(day.consecutiveNoSpendDays))
-                    .frame(width: 28, height: 28)
+                    .frame(width: 32, height: 32)
             }
 
             Text("\(dayNumber)")
-                .font(.caption2)
+                .font(.caption)
                 .foregroundStyle(day.isFuture ? Color.secondary : Color.white)
         }
         .accessibilityLabel(dayAccessibilityLabel(for: day))
@@ -91,9 +91,9 @@ struct StreakCalendarView: View {
     // MARK: - Day Detail Overlay
 
     private func dayDetailOverlay(for day: DayStatus) -> some View {
-        VStack(spacing: 4) {
+        VStack(spacing: AppSpacing.xxs) {
             Text(day.date, style: .date)
-                .font(.caption2.weight(.medium))
+                .font(.caption.weight(.medium))
 
             if day.isFuture {
                 Text("Upcoming")
@@ -110,7 +110,7 @@ struct StreakCalendarView: View {
 
                 if day.consecutiveNoSpendDays > 1 {
                     Text("\(day.consecutiveNoSpendDays)-day streak")
-                        .font(.caption2)
+                        .font(.caption)
                         .foregroundStyle(.secondary)
                 }
             }

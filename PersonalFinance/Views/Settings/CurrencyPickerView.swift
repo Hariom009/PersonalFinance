@@ -22,11 +22,11 @@ struct CurrencyPickerView: View {
                 dismiss()
             } label: {
                 HStack {
-                    VStack(alignment: .leading, spacing: 2) {
+                    VStack(alignment: .leading, spacing: AppSpacing.xxs) {
                         Text(currency.name)
                             .foregroundStyle(.primary)
                         Text("\(currency.symbol) — \(currency.code)")
-                            .font(.caption)
+                            .font(.footnote)
                             .foregroundStyle(.secondary)
                     }
 

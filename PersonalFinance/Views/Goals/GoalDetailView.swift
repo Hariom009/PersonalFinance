@@ -87,11 +87,11 @@ struct GoalDetailView: View {
 
             // Status badge
             let status = viewModel.goal.status
-            HStack(spacing: 6) {
+            HStack(spacing: AppSpacing.xs) {
                 Image(systemName: status.icon)
-                    .font(.system(size: 10))
+                    .font(.system(size: 12))
                 Text(status.label)
-                    .font(.system(size: 12, weight: .semibold))
+                    .font(.system(size: 13, weight: .semibold))
             }
             .foregroundStyle(status.color)
             .padding(.horizontal, 12)
@@ -136,13 +136,13 @@ struct GoalDetailView: View {
     }
 
     private func statItem(title: String, value: String) -> some View {
-        VStack(spacing: 4) {
+        VStack(spacing: AppSpacing.xs) {
             Text(value)
                 .font(.system(.subheadline, design: .rounded).weight(.semibold))
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
             Text(title)
-                .font(.caption2)
+                .font(.caption)
                 .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity)
@@ -197,26 +197,26 @@ struct GoalDetailView: View {
                             ZStack {
                                 Circle()
                                     .fill(Color.incomeGreen.opacity(0.15))
-                                    .frame(width: 36, height: 36)
+                                    .frame(width: AppSize.iconContainerMedium, height: AppSize.iconContainerMedium)
                                 Image(systemName: "plus")
-                                    .font(.system(size: 14, weight: .semibold))
+                                    .font(.system(size: AppSize.iconSmall, weight: .semibold))
                                     .foregroundStyle(.incomeGreen)
                             }
 
-                            VStack(alignment: .leading, spacing: 2) {
+                            VStack(alignment: .leading, spacing: AppSpacing.xxs) {
                                 Text("+\(contribution.amount.asCurrency)")
                                     .font(.system(.subheadline, design: .rounded).weight(.semibold))
                                     .foregroundStyle(.incomeGreen)
 
                                 Text(contribution.note.isEmpty ? "Contribution" : contribution.note)
-                                    .font(.caption)
+                                    .font(.footnote)
                                     .foregroundStyle(.secondary)
                             }
 
                             Spacer()
 
                             Text(contribution.date.formattedRelative)
-                                .font(.caption2)
+                                .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
                         .padding(.vertical, 8)

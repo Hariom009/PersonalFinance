@@ -89,9 +89,9 @@ struct InsightsView: View {
                             .foregroundStyle(top.category.color)
                     }
 
-                    VStack(alignment: .leading, spacing: 4) {
+                    VStack(alignment: .leading, spacing: AppSpacing.xs) {
                         Text("Top Spending")
-                            .font(.caption)
+                            .font(.footnote)
                             .foregroundStyle(.secondary)
 
                         Text(top.category.title)
@@ -109,7 +109,7 @@ struct InsightsView: View {
                         Image(systemName: isUp ? "arrow.up.right" : "arrow.down.right")
                         Text("\(abs(top.percentChange), specifier: "%.0f")% vs last month")
                     }
-                    .font(.caption.weight(.medium))
+                    .font(.footnote.weight(.medium))
                     .foregroundStyle(isUp ? Color.expenseRed : Color.incomeGreen)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 4)
@@ -163,7 +163,7 @@ struct InsightsView: View {
                     AxisValueLabel {
                         if let amount = value.as(Double.self) {
                             Text(amount.asCurrency)
-                                .font(.caption2)
+                                .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
                     }
@@ -229,7 +229,7 @@ struct InsightsView: View {
                     AxisValueLabel {
                         if let amount = value.as(Double.self) {
                             Text(amount.asCurrency)
-                                .font(.caption2)
+                                .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
                     }
@@ -270,7 +270,7 @@ struct InsightsView: View {
                     .cornerRadius(4)
                     .annotation(position: .trailing, alignment: .leading, spacing: 4) {
                         Text(item.amount.asCurrency)
-                            .font(.caption2)
+                            .font(.caption)
                             .foregroundStyle(.secondary)
                     }
                 }
@@ -286,7 +286,7 @@ struct InsightsView: View {
                         AxisValueLabel {
                             if let amount = value.as(Double.self) {
                                 Text(amount.asCurrency)
-                                    .font(.caption2)
+                                    .font(.caption)
                                     .foregroundStyle(.secondary)
                             }
                         }
@@ -347,14 +347,14 @@ struct InsightsView: View {
     }
 
     private func quickStatCard(icon: String, value: String, label: String, color: Color) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: AppSpacing.sm) {
             ZStack {
                 Circle()
                     .fill(color.opacity(0.15))
-                    .frame(width: 32, height: 32)
+                    .frame(width: 36, height: 36)
 
                 Image(systemName: icon)
-                    .font(.system(size: 14))
+                    .font(.system(size: AppSize.iconSmall))
                     .foregroundStyle(color)
             }
 
@@ -364,11 +364,11 @@ struct InsightsView: View {
                 .minimumScaleFactor(0.7)
 
             Text(label)
-                .font(.caption)
+                .font(.footnote)
                 .foregroundStyle(.secondary)
                 .lineLimit(2)
         }
-        .padding(14)
+        .padding(AppSize.cardPadding)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color.cardBackground)
         .clipShape(RoundedRectangle(cornerRadius: 14))

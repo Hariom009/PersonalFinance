@@ -23,20 +23,20 @@ struct BudgetGridCard: View {
     }
 
     var body: some View {
-        VStack(spacing: 8) {
-            HStack(spacing: 6) {
+        VStack(spacing: AppSpacing.sm) {
+            HStack(spacing: AppSpacing.sm) {
                 ZStack {
                     Circle()
                         .fill(category.color.opacity(0.15))
-                        .frame(width: 24, height: 24)
+                        .frame(width: 28, height: 28)
 
                     Image(systemName: category.iconName)
-                        .font(.system(size: 11))
+                        .font(.system(size: 13))
                         .foregroundStyle(category.color)
                 }
 
                 Text(category.title)
-                    .font(.caption.weight(.semibold))
+                    .font(.subheadline.weight(.semibold))
                     .lineLimit(1)
 
                 Spacer()
