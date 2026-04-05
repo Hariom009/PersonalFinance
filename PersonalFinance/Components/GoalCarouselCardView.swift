@@ -38,7 +38,7 @@ struct GoalCarouselCardView: View {
 
     var body: some View {
         VStack(alignment: .leading) {
-            // MARK: - Top: Icon + Name
+            // MARK: - Top: Icon + Name + Status
             HStack(spacing: 10) {
                 ZStack {
                     Circle()
@@ -53,7 +53,7 @@ struct GoalCarouselCardView: View {
                 Text(goal.name)
                     .font(.system(size: 12, weight: .bold, design: .default))
                     .foregroundStyle(.primary)
-                    .lineLimit(2)
+                    .lineLimit(1)
                     .minimumScaleFactor(0.8)
             }
 
@@ -149,6 +149,7 @@ struct GoalCarouselCardView: View {
         if days == 0 { return "Due today" }
         return "\(days) days left"
     }
+
 }
 
 // MARK: - Decorative Pattern

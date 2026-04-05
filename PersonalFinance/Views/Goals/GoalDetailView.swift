@@ -20,7 +20,7 @@ struct GoalDetailView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 24) {
-                progressSection
+                heroHeader
                 statsRow
                 daysRemainingBadge
                 addFundsButton
@@ -33,6 +33,29 @@ struct GoalDetailView: View {
         .background(Color.appBackground)
         .navigationTitle(viewModel.goal.name)
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button(role: .destructive) {
+                    showDeleteConfirmation = true
+                } label: {
+                    Image(systemName: "trash")
+                        .font(.system(size: 14))
+                        .foregroundStyle(.expenseRed)
+                }
+                .confirmationDialog(
+                    "Delete this goal?",
+                    isPresented: $showDeleteConfirmation,
+                    titleVisibility: .visible
+                ) {
+                    Button("Delete", role: .destructive) {
+                        viewModel.deleteGoal(context: context)
+                        dismiss()
+                    }
+                } message: {
+                    Text("This will permanently remove the goal and all contributions.")
+                }
+            }
+        }
         .onAppear { viewModel.loadContributions(context: context) }
         .sheet(isPresented: $viewModel.showingAddFunds) {
             addFundsSheet
@@ -47,13 +70,54 @@ struct GoalDetailView: View {
         }
     }
 
-    // MARK: - Progress Ring
+    // MARK: - Hero Header
 
-    private var progressSection: some View {
-        CircularProgressView(progress: viewModel.goal.progress)
-            .scaleEffect(ringPulse ? 1.05 : 1.0)
-            .animation(.spring(response: 0.3, dampingFraction: 0.5), value: ringPulse)
-            .padding(.top, 8)
+    private var heroHeader: some View {
+        VStack(spacing: 16) {
+            // Icon
+            ZStack {
+                Circle()
+                    .fill(Color.appPrimary.opacity(0.15))
+                    .frame(width: 72, height: 72)
+
+                Image(systemName: viewModel.goal.isCompleted ? "trophy.fill" : viewModel.goal.iconName)
+                    .font(.system(size: 32, weight: .semibold))
+                    .foregroundStyle(viewModel.goal.isCompleted ? .incomeGreen : .appPrimary)
+            }
+
+            // Status badge
+            let status = viewModel.goal.status
+            HStack(spacing: 6) {
+                Image(systemName: status.icon)
+                    .font(.system(size: 10))
+                Text(status.label)
+                    .font(.system(size: 12, weight: .semibold))
+            }
+            .foregroundStyle(status.color)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 6)
+            .background(status.color.opacity(0.12))
+            .clipShape(Capsule())
+
+            // Progress ring
+            CircularProgressView(progress: viewModel.goal.progress)
+                .scaleEffect(ringPulse ? 1.05 : 1.0)
+                .animation(.spring(response: 0.3, dampingFraction: 0.5), value: ringPulse)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 20)
+        .background(
+            LinearGradient(
+                colors: [
+                    Color.appPrimary.opacity(0.08),
+                    Color.appPrimary.opacity(0.02),
+                    Color.clear
+                ],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 20))
     }
 
     // MARK: - Stats Row
@@ -172,36 +236,14 @@ struct GoalDetailView: View {
     // MARK: - Edit / Delete
 
     private var editDeleteSection: some View {
-        VStack(spacing: 12) {
-            Button {
-                viewModel.showingEditGoal = true
-            } label: {
-                Text("Edit Goal")
-                    .frame(maxWidth: .infinity)
-            }
-            .buttonStyle(.bordered)
-            .controlSize(.large)
-
-            Button(role: .destructive) {
-                showDeleteConfirmation = true
-            } label: {
-                Text("Delete Goal")
-                    .frame(maxWidth: .infinity)
-            }
-            .controlSize(.large)
-            .confirmationDialog(
-                "Delete this goal?",
-                isPresented: $showDeleteConfirmation,
-                titleVisibility: .visible
-            ) {
-                Button("Delete", role: .destructive) {
-                    viewModel.deleteGoal(context: context)
-                    dismiss()
-                }
-            } message: {
-                Text("This will permanently remove the goal and all contributions.")
-            }
+        Button {
+            viewModel.showingEditGoal = true
+        } label: {
+            Text("Edit Goal")
+                .frame(maxWidth: .infinity)
         }
+        .buttonStyle(.bordered)
+        .controlSize(.large)
     }
 
     // MARK: - Add Funds Sheet

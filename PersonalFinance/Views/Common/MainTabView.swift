@@ -3,10 +3,11 @@ import SwiftData
 
 struct MainTabView: View {
     @State private var selectedTab: Int = 0
+    @State private var goalSegment: Int = 0
 
     var body: some View {
         TabView(selection: $selectedTab) {
-            DashboardView(selectedTab: $selectedTab)
+            DashboardView(selectedTab: $selectedTab, goalSegment: $goalSegment)
                 .tabItem {
                     Label("Home", systemImage: "house.fill")
                 }
@@ -18,7 +19,7 @@ struct MainTabView: View {
                 }
                 .tag(1)
 
-            GoalsListView()
+            GoalsListView(selectedSegment: $goalSegment)
                 .tabItem {
                     Label("Goals", systemImage: "target")
                 }

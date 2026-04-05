@@ -24,9 +24,13 @@ final class DashboardViewModel {
     var isLoading = false
     var errorMessage: String?
 
+    var challengeStreak: Int = 0
+    var hasActiveChallenge: Bool = false
+
     private let transactionService = TransactionService()
     private let goalService = GoalService()
     private let budgetService = BudgetService()
+    private let challengeService = ChallengeService()
 
     // MARK: - Greeting
 
@@ -169,6 +173,17 @@ final class DashboardViewModel {
             transactions = try transactionService.fetch(context: context)
             goals = try goalService.fetch(context: context)
             budgets = try budgetService.fetchBudgets(context: context)
+
+            let challengeDescriptor = FetchDescriptor<NoSpendChallenge>(
+                predicate: #Predicate<NoSpendChallenge> { $0.isActive == true }
+            )
+            if let activeChallenge = try context.fetch(challengeDescriptor).first {
+                hasActiveChallenge = true
+                challengeStreak = challengeService.computeStreak(challenge: activeChallenge, transactions: transactions)
+            } else {
+                hasActiveChallenge = false
+                challengeStreak = 0
+            }
         } catch {
             transactions = []
             goals = []

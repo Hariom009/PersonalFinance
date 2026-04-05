@@ -2,16 +2,35 @@ import SwiftUI
 import SwiftData
 import AVFoundation
 
+private final class SwipeSoundPlayer: @unchecked Sendable {
+    private var player: AVAudioPlayer?
+    private let queue = DispatchQueue(label: "swipe-sound", qos: .userInteractive)
+
+    init() {
+        guard let url = Bundle.main.url(forResource: "swipe_sound", withExtension: "mp3") else { return }
+        player = try? AVAudioPlayer(contentsOf: url)
+        player?.prepareToPlay()
+    }
+
+    func play() {
+        queue.async { [weak self] in
+            self?.player?.currentTime = 0
+            self?.player?.play()
+        }
+    }
+}
+
 struct GoalCarouselView: View {
     let goals: [SavingsGoal]
     let onAddGoal: () -> Void
     let onSelectGoal: (SavingsGoal) -> Void
+    var onQuickAddFunds: ((SavingsGoal) -> Void)? = nil
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var currentIndex: Int = 0
     @State private var dragOffset: CGFloat = 0
     @State private var appeared: Bool = false
-    @State private var swipeSoundPlayer: AVAudioPlayer?
+    private let soundPlayer = SwipeSoundPlayer()
 
     private let cardWidth: CGFloat = 190
     private let cardHeight: CGFloat = 276
@@ -36,6 +55,21 @@ struct GoalCarouselView: View {
                             } else {
                                 withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
                                     currentIndex = index
+                                }
+                            }
+                        }
+                        .contextMenu {
+                            Button {
+                                onSelectGoal(goal)
+                            } label: {
+                                Label("View Details", systemImage: "eye")
+                            }
+
+                            if !goal.isCompleted, let onQuickAddFunds {
+                                Button {
+                                    onQuickAddFunds(goal)
+                                } label: {
+                                    Label("Add Funds", systemImage: "plus.circle")
                                 }
                             }
                         }
@@ -96,27 +130,11 @@ struct GoalCarouselView: View {
             }
         }
         .onChange(of: currentIndex) {
-            playSwipeSound()
-        }
-        .onAppear {
-            prepareSwipeSound()
+            soundPlayer.play()
         }
         .accessibilityElement(children: .contain)
         .accessibilityLabel("Savings goals carousel, \(goals.count) goals")
         .accessibilityHint("Swipe left or right to browse goals")
-    }
-
-    // MARK: - Sound
-
-    private func prepareSwipeSound() {
-        guard let url = Bundle.main.url(forResource: "swipe_sound", withExtension: "mp3") else { return }
-        swipeSoundPlayer = try? AVAudioPlayer(contentsOf: url)
-        swipeSoundPlayer?.prepareToPlay()
-    }
-
-    private func playSwipeSound() {
-        swipeSoundPlayer?.currentTime = 0
-        swipeSoundPlayer?.play()
     }
 
     // MARK: - Layout Calculations

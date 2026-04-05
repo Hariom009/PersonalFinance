@@ -5,7 +5,6 @@ import SwiftData
 final class GoalsListViewModel {
     var goals: [SavingsGoal] = []
     var isLoading = false
-    var selectedSegment: Int = 0
     var showingAddGoal: Bool = false
 
     private let goalService = GoalService()

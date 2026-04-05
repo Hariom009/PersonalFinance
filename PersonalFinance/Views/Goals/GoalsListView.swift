@@ -4,13 +4,22 @@ import SwiftData
 struct GoalsListView: View {
     @Environment(\.modelContext) private var context
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Binding var selectedSegment: Int
     @State private var viewModel = GoalsListViewModel()
     @State private var overallBarProgress: Double = 0
+    @State private var selectedGoal: SavingsGoal?
+    @State private var quickFundGoal: SavingsGoal?
+    @State private var quickFundAmount: String = ""
+    @State private var quickFundNote: String = ""
+    @State private var fundsTrigger = false
+    @FocusState private var quickFundFocused: QuickFundField?
+
+    enum QuickFundField { case amount, note }
 
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                Picker("", selection: $viewModel.selectedSegment) {
+                Picker("", selection: $selectedSegment) {
                     Text("Goals").tag(0)
                     Text("Challenge").tag(1)
                     Text("Budgets").tag(2)
@@ -20,7 +29,7 @@ struct GoalsListView: View {
                 .padding(.vertical, 8)
 
                 Group {
-                    switch viewModel.selectedSegment {
+                    switch selectedSegment {
                     case 0:
                         goalsContent
                     case 1:
@@ -31,7 +40,7 @@ struct GoalsListView: View {
                         goalsContent
                     }
                 }
-                .animation(.easeInOut(duration: 0.25), value: viewModel.selectedSegment)
+                .animation(.easeInOut(duration: 0.25), value: selectedSegment)
             }
             .onAppear { viewModel.loadGoals(context: context) }
             .sheet(isPresented: $viewModel.showingAddGoal) {
@@ -41,6 +50,12 @@ struct GoalsListView: View {
                         onSave: { viewModel.loadGoals(context: context) }
                     )
                 }
+            }
+            .navigationDestination(item: $selectedGoal) { goal in
+                GoalDetailView(goal: goal)
+            }
+            .sheet(item: $quickFundGoal) { goal in
+                quickAddFundsSheet(for: goal)
             }
         }
     }
@@ -67,22 +82,16 @@ struct GoalsListView: View {
                             VStack(alignment: .leading, spacing: 12) {
                                 SectionHeaderView(title: "Active Goals")
 
-                                ScrollView(.horizontal, showsIndicators: false) {
-                                    HStack(spacing: 12) {
-                                        ForEach(viewModel.activeGoals) { goal in
-                                            NavigationLink {
-                                                GoalDetailView(goal: goal)
-                                            } label: {
-                                                GoalCarouselCardView(
-                                                    goal: goal,
-                                                    depth: .front
-                                                )
-                                            }
-                                            .buttonStyle(.plain)
-                                        }
+                                GoalCarouselView(
+                                    goals: viewModel.activeGoals,
+                                    onAddGoal: { viewModel.showingAddGoal = true },
+                                    onSelectGoal: { goal in
+                                        selectedGoal = goal
+                                    },
+                                    onQuickAddFunds: { goal in
+                                        quickFundGoal = goal
                                     }
-                                    .padding(.horizontal, 2)
-                                }
+                                )
                             }
                         }
 
@@ -94,7 +103,7 @@ struct GoalsListView: View {
                                     NavigationLink {
                                         GoalDetailView(goal: goal)
                                     } label: {
-                                        goalCard(goal: goal, completed: true)
+                                        completedGoalCard(goal: goal)
                                     }
                                     .buttonStyle(.plain)
                                 }
@@ -107,51 +116,80 @@ struct GoalsListView: View {
             }
 
             // FAB
-            Button {
-                viewModel.showingAddGoal = true
-            } label: {
-                Image(systemName: "plus")
-                    .font(.title2.weight(.semibold))
-                    .foregroundStyle(.white)
-                    .frame(width: 56, height: 56)
-                    .background(Color.appPrimary)
-                    .clipShape(Circle())
-                    .shadow(color: Color.appPrimary.opacity(0.3), radius: 8, x: 0, y: 4)
+            if !viewModel.goals.isEmpty {
+                Button {
+                    viewModel.showingAddGoal = true
+                } label: {
+                    Image(systemName: "plus")
+                        .font(.title2.weight(.semibold))
+                        .foregroundStyle(.white)
+                        .frame(width: 56, height: 56)
+                        .background(Color.appPrimary)
+                        .clipShape(Circle())
+                        .shadow(color: Color.appPrimary.opacity(0.3), radius: 8, x: 0, y: 4)
+                }
+                .padding(.trailing, 20)
+                .padding(.bottom, 20)
             }
-            .padding(.trailing, 20)
-            .padding(.bottom, 20)
         }
     }
 
-    // MARK: - Overall Progress
+    // MARK: - Overall Progress (Rich Card)
 
     private var overallProgressCard: some View {
-        VStack(spacing: 8) {
-            HStack {
+        HStack(spacing: 16) {
+            // Mini circular progress
+            ZStack {
+                Circle()
+                    .stroke(Color.appPrimary.opacity(0.15), lineWidth: 6)
+
+                Circle()
+                    .trim(from: 0, to: overallBarProgress)
+                    .stroke(Color.appPrimary, style: StrokeStyle(lineWidth: 6, lineCap: .round))
+                    .rotationEffect(.degrees(-90))
+
+                Text("\(Int(viewModel.overallProgress * 100))%")
+                    .font(.system(size: 14, weight: .bold, design: .rounded))
+                    .foregroundStyle(.appPrimary)
+            }
+            .frame(width: 64, height: 64)
+
+            VStack(alignment: .leading, spacing: 6) {
                 Text("Total Savings")
-                    .font(.subheadline.weight(.medium))
-                Spacer()
-                Text("\(viewModel.totalSaved.asCurrency) of \(viewModel.totalTarget.asCurrency)")
-                    .font(.system(.caption, design: .rounded))
+                    .font(.system(.caption, design: .serif).weight(.medium))
                     .foregroundStyle(.secondary)
-            }
 
-            GeometryReader { geo in
-                ZStack(alignment: .leading) {
-                    Capsule()
-                        .fill(Color.incomeGreen.opacity(0.15))
-                        .frame(height: 8)
+                Text("\(viewModel.totalSaved.asCurrency)")
+                    .font(.system(.title3, design: .rounded).weight(.bold))
 
-                    Capsule()
-                        .fill(Color.incomeGreen)
-                        .frame(width: geo.size.width * overallBarProgress, height: 8)
+                Text("of \(viewModel.totalTarget.asCurrency)")
+                    .font(.system(.caption2, design: .rounded))
+                    .foregroundStyle(.secondary)
+
+                HStack(spacing: 12) {
+                    Label("\(viewModel.activeGoals.count) active", systemImage: "flame.fill")
+                        .font(.system(size: 10, weight: .medium))
+                        .foregroundStyle(.secondary)
+
+                    if !viewModel.completedGoals.isEmpty {
+                        Label("\(viewModel.completedGoals.count) done", systemImage: "checkmark.circle.fill")
+                            .font(.system(size: 10, weight: .medium))
+                            .foregroundStyle(.incomeGreen)
+                    }
                 }
+
+                Text(motivationalMessage)
+                    .font(.system(size: 10, weight: .medium, design: .serif))
+                    .foregroundStyle(.appPrimary)
+                    .italic()
             }
-            .frame(height: 8)
+
+            Spacer()
         }
-        .padding(14)
+        .padding(16)
         .background(Color.cardBackground)
-        .clipShape(RoundedRectangle(cornerRadius: 14))
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .shadow(color: .black.opacity(0.04), radius: 8, x: 0, y: 2)
         .onAppear {
             if reduceMotion {
                 overallBarProgress = viewModel.overallProgress
@@ -163,58 +201,132 @@ struct GoalsListView: View {
         }
     }
 
-    // MARK: - Goal Card
+    private var motivationalMessage: String {
+        let p = viewModel.overallProgress
+        if p == 0 { return "Every journey starts with a single step" }
+        if p < 0.25 { return "Great start! Keep the momentum going" }
+        if p < 0.5 { return "You're building something amazing" }
+        if p < 0.75 { return "Halfway there! Stay consistent" }
+        if p < 1.0 { return "Almost there! The finish line is in sight" }
+        return "All goals achieved! Time for new dreams"
+    }
 
-    private func goalCard(goal: SavingsGoal, completed: Bool = false) -> some View {
+    // MARK: - Completed Goal Card (Celebration)
+
+    private func completedGoalCard(goal: SavingsGoal) -> some View {
         HStack(spacing: 14) {
             ZStack {
                 Circle()
-                    .fill(completed ? Color.incomeGreen.opacity(0.15) : Color.decorativeIconBg)
+                    .fill(Color.incomeGreen.opacity(0.15))
                     .frame(width: 44, height: 44)
 
-                Image(systemName: completed ? "checkmark.circle.fill" : goal.iconName)
+                Image(systemName: "trophy.fill")
                     .font(.system(size: 20))
-                    .foregroundStyle(completed ? .incomeGreen : .secondary)
+                    .foregroundStyle(.incomeGreen)
             }
 
-            VStack(alignment: .leading, spacing: 6) {
+            VStack(alignment: .leading, spacing: 4) {
                 Text(goal.name)
                     .font(.subheadline.weight(.medium))
 
-                GeometryReader { geo in
-                    ZStack(alignment: .leading) {
-                        Capsule()
-                            .fill(Color.incomeGreen.opacity(0.15))
-                            .frame(height: 6)
-                        Capsule()
-                            .fill(Color.incomeGreen)
-                            .frame(width: geo.size.width * goal.progress, height: 6)
-                    }
-                }
-                .frame(height: 6)
-
-                HStack {
-                    Text("\(goal.currentAmount.asCurrency) of \(goal.targetAmount.asCurrency)")
-                        .font(.system(.caption, design: .rounded))
-                        .foregroundStyle(.secondary)
-
-                    Spacer()
-
-                    if !completed {
-                        let days = Calendar.current.dateComponents([.day], from: .now, to: goal.deadline).day ?? 0
-                        Text("\(max(days, 0))d left")
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
-                    }
-                }
+                Text(goal.targetAmount.asCurrency)
+                    .font(.system(.caption, design: .rounded).weight(.semibold))
+                    .foregroundStyle(.incomeGreen)
             }
+
+            Spacer()
+
+            // "Achieved" badge
+            Text("Achieved")
+                .font(.system(size: 10, weight: .semibold))
+                .foregroundStyle(.incomeGreen)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 4)
+                .background(Color.incomeGreen.opacity(0.12))
+                .clipShape(Capsule())
 
             Image(systemName: "chevron.right")
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
         .padding(14)
-        .background(Color.cardBackground)
-        .clipShape(RoundedRectangle(cornerRadius: 14))
+        .background(
+            RoundedRectangle(cornerRadius: 14)
+                .fill(Color.cardBackground)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14)
+                        .stroke(Color.incomeGreen.opacity(0.2), lineWidth: 1)
+                )
+        )
+    }
+
+    // MARK: - Quick Add Funds Sheet
+
+    private func quickAddFundsSheet(for goal: SavingsGoal) -> some View {
+        NavigationStack {
+            VStack(spacing: 20) {
+                HStack(spacing: 10) {
+                    ZStack {
+                        Circle()
+                            .fill(Color.appPrimary.opacity(0.15))
+                            .frame(width: 36, height: 36)
+                        Image(systemName: goal.iconName)
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundStyle(.appPrimary)
+                    }
+                    Text(goal.name)
+                        .font(.system(.headline, design: .serif))
+                }
+
+                TextField("0.00", text: $quickFundAmount)
+                    .font(.system(size: 40, weight: .bold, design: .rounded))
+                    .keyboardType(.decimalPad)
+                    .multilineTextAlignment(.center)
+                    .foregroundStyle(.incomeGreen)
+                    .focused($quickFundFocused, equals: .amount)
+
+                TextField("Note (optional)", text: $quickFundNote)
+                    .focused($quickFundFocused, equals: .note)
+                    .padding(12)
+                    .background(Color.cardBackground)
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+
+                Button {
+                    if let amount = Double(quickFundAmount), amount > 0 {
+                        let service = ContributionService()
+                        service.addFunds(to: goal, amount: amount, note: quickFundNote, context: context)
+                        fundsTrigger.toggle()
+                        quickFundAmount = ""
+                        quickFundNote = ""
+                        quickFundGoal = nil
+                        viewModel.loadGoals(context: context)
+                    }
+                } label: {
+                    Text("Add")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.large)
+                .disabled(Double(quickFundAmount) ?? 0 <= 0)
+
+                Spacer()
+            }
+            .padding(20)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") {
+                        quickFundAmount = ""
+                        quickFundNote = ""
+                        quickFundGoal = nil
+                    }
+                }
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+                    Button("Done") { quickFundFocused = nil }
+                }
+            }
+            .sensoryFeedback(.success, trigger: fundsTrigger)
+        }
+        .presentationDetents([.height(340)])
     }
 }

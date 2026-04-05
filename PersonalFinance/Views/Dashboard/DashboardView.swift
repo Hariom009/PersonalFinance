@@ -11,7 +11,15 @@ struct DashboardView: View {
     @State private var showAddGoal = false
     @State private var selectedDay: String?
     @State private var selectedGoal: SavingsGoal?
+    @State private var quickFundGoal: SavingsGoal?
+    @State private var quickFundAmount: String = ""
+    @State private var quickFundNote: String = ""
+    @State private var quickFundTrigger = false
+    @FocusState private var dashQuickFundFocus: DashQuickFundField?
     @Binding var selectedTab: Int
+    @Binding var goalSegment: Int
+
+    enum DashQuickFundField { case amount, note }
 
     // Animation states
     @State private var hasAppeared = false
@@ -100,7 +108,80 @@ struct DashboardView: View {
                     )
                 }
             }
+            .sheet(item: $quickFundGoal) { goal in
+                dashboardQuickFundSheet(for: goal)
+            }
         }
+    }
+
+    // MARK: - Quick Add Funds Sheet
+
+    private func dashboardQuickFundSheet(for goal: SavingsGoal) -> some View {
+        NavigationStack {
+            VStack(spacing: 20) {
+                HStack(spacing: 10) {
+                    ZStack {
+                        Circle()
+                            .fill(Color.appPrimary.opacity(0.15))
+                            .frame(width: 36, height: 36)
+                        Image(systemName: goal.iconName)
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundStyle(.appPrimary)
+                    }
+                    Text(goal.name)
+                        .font(.system(.headline, design: .serif))
+                }
+
+                TextField("0.00", text: $quickFundAmount)
+                    .font(.system(size: 40, weight: .bold, design: .rounded))
+                    .keyboardType(.decimalPad)
+                    .multilineTextAlignment(.center)
+                    .foregroundStyle(.incomeGreen)
+                    .focused($dashQuickFundFocus, equals: .amount)
+
+                TextField("Note (optional)", text: $quickFundNote)
+                    .focused($dashQuickFundFocus, equals: .note)
+                    .padding(12)
+                    .background(Color.cardBackground)
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+
+                Button {
+                    if let amount = Double(quickFundAmount), amount > 0 {
+                        let service = ContributionService()
+                        service.addFunds(to: goal, amount: amount, note: quickFundNote, context: context)
+                        quickFundTrigger.toggle()
+                        quickFundAmount = ""
+                        quickFundNote = ""
+                        quickFundGoal = nil
+                        viewModel.loadData(context: context)
+                    }
+                } label: {
+                    Text("Add")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.large)
+                .disabled(Double(quickFundAmount) ?? 0 <= 0)
+
+                Spacer()
+            }
+            .padding(20)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") {
+                        quickFundAmount = ""
+                        quickFundNote = ""
+                        quickFundGoal = nil
+                    }
+                }
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+                    Button("Done") { dashQuickFundFocus = nil }
+                }
+            }
+            .sensoryFeedback(.success, trigger: quickFundTrigger)
+        }
+        .presentationDetents([.height(340)])
     }
 
     // MARK: - Animation Triggers
@@ -187,10 +268,27 @@ struct DashboardView: View {
 
     private var inlineNavBar: some View {
         HStack {
-//            Text("Home")
-//                .font(.headline)
-
             Spacer()
+            if viewModel.hasActiveChallenge {
+                Button {
+                    goalSegment = 1
+                    selectedTab = 2
+                } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: "flame.fill")
+                            .font(.system(size: 14))
+                            .foregroundStyle(.orange)
+                        Text("\(viewModel.challengeStreak)")
+                            .font(.system(size: 14, weight: .bold, design: .rounded))
+                            .foregroundStyle(.primary)
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .background(Color.cardBackground)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .shadow(color: .black.opacity(0.04), radius: 4, x: 0, y: 2)
+                }
+            }
 
             NavigationLink {
                 SettingsView()
@@ -198,6 +296,10 @@ struct DashboardView: View {
                 Image(systemName: "gearshape")
                     .font(.body)
                     .foregroundStyle(.primary)
+                    .padding(8)
+                    .background(Color.cardBackground)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .shadow(color: .black.opacity(0.04), radius: 4, x: 0, y: 2)
             }
         }
     }
@@ -497,6 +599,9 @@ struct DashboardView: View {
                     onAddGoal: { showAddGoal = true },
                     onSelectGoal: { goal in
                         selectedGoal = goal
+                    },
+                    onQuickAddFunds: { goal in
+                        quickFundGoal = goal
                     }
                 )
 
@@ -585,6 +690,7 @@ struct DashboardView: View {
 
 #Preview {
     @Previewable @State var tab = 0
-    DashboardView(selectedTab: $tab)
+    @Previewable @State var segment = 0
+    DashboardView(selectedTab: $tab, goalSegment: $segment)
         .modelContainer(for: [Transaction.self, SavingsGoal.self], inMemory: true)
 }
