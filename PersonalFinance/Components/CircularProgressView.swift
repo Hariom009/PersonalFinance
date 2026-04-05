@@ -3,7 +3,7 @@ import SwiftUI
 struct CircularProgressView: View {
     let progress: Double
     var lineWidth: CGFloat = 12
-    var color: Color = .appPrimary
+    var color: Color = .incomeGreen
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var animatedProgress: Double = 0

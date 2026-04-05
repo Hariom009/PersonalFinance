@@ -16,14 +16,6 @@ final class SettingsViewModel {
         Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "1"
     }
 
-    var currencyCode: String {
-        Locale.current.currency?.identifier ?? "USD"
-    }
-
-    var currencySymbol: String {
-        Locale.current.currencySymbol ?? "$"
-    }
-
     func exportTransactions(context: ModelContext) {
         do {
             let transactions = try transactionService.fetch(context: context)

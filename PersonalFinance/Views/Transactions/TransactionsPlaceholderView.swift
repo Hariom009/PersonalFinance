@@ -6,7 +6,7 @@ struct TransactionsPlaceholderView: View {
             VStack(spacing: 16) {
                 Image(systemName: "list.bullet.rectangle")
                     .font(.system(size: 60))
-                    .foregroundStyle(.appPrimary)
+                    .foregroundStyle(.secondary)
                 Text("Transactions")
                     .font(.title2.bold())
                 Text("Track your income and expenses here")

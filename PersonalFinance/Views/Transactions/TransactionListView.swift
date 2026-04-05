@@ -192,7 +192,7 @@ struct TransactionListView: View {
                                 } label: {
                                     Label("Edit", systemImage: "pencil")
                                 }
-                                .tint(Color.appPrimary)
+                                .tint(.blue)
                             }
                     }
                 }

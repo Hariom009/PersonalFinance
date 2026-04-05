@@ -89,7 +89,7 @@ struct GoalDetailView: View {
     private var daysRemainingBadge: some View {
         HStack(spacing: 8) {
             Image(systemName: viewModel.goal.isCompleted ? "checkmark.circle.fill" : "calendar")
-                .foregroundStyle(viewModel.goal.isCompleted ? .incomeGreen : .appPrimary)
+                .foregroundStyle(viewModel.goal.isCompleted ? .incomeGreen : .secondary)
 
             Text(viewModel.goal.isCompleted ? "Goal Completed!" : "\(viewModel.daysRemaining) days remaining")
                 .font(.subheadline.weight(.medium))

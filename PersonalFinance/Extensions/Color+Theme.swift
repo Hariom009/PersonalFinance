@@ -7,6 +7,9 @@ extension ShapeStyle where Self == Color {
     static var expenseRed: Color { .red }
     static var appBackground: Color { Color(.systemGroupedBackground) }
     static var cardBackground: Color { Color(.secondarySystemGroupedBackground) }
+    static var chartBarDefault: Color { Color(.systemGray4) }
+    static var chartBarHighlight: Color { Color(.systemGray2) }
+    static var decorativeIconBg: Color { Color(.systemGray5) }
 }
 
 extension Color {

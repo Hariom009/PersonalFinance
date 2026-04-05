@@ -6,6 +6,7 @@ struct SettingsView: View {
     @State private var viewModel = SettingsViewModel()
     @AppStorage("userName") private var userName = ""
     @AppStorage("isBiometricEnabled") private var biometricEnabled = false
+    @AppStorage("selectedCurrencyCode") private var selectedCurrencyCode = CurrencyOption.defaultCode
 
     var body: some View {
         List {
@@ -27,12 +28,12 @@ struct SettingsView: View {
             HStack(spacing: 12) {
                 ZStack {
                     Circle()
-                        .fill(Color.appPrimary.opacity(0.12))
+                        .fill(Color.decorativeIconBg)
                         .frame(width: 44, height: 44)
 
                     Image(systemName: "person.circle.fill")
                         .font(.title2)
-                        .foregroundStyle(Color.appPrimary)
+                        .foregroundStyle(.secondary)
                 }
 
                 TextField("Your Name", text: $userName)
@@ -47,11 +48,20 @@ struct SettingsView: View {
 
     private var preferencesSection: some View {
         Section {
-            HStack {
-                Label("Currency", systemImage: "dollarsign.circle")
-                Spacer()
-                Text("\(viewModel.currencySymbol) (\(viewModel.currencyCode))")
-                    .foregroundStyle(.secondary)
+            NavigationLink {
+                CurrencyPickerView()
+            } label: {
+                HStack {
+                    Label("Currency", systemImage: "dollarsign.circle")
+                    Spacer()
+                    if let option = CurrencyOption.option(for: selectedCurrencyCode) {
+                        Text("\(option.symbol) (\(option.code))")
+                            .foregroundStyle(.secondary)
+                    } else {
+                        Text(selectedCurrencyCode)
+                            .foregroundStyle(.secondary)
+                    }
+                }
             }
         } header: {
             Text("Preferences")

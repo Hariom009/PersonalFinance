@@ -17,7 +17,7 @@ struct BudgetProgressRow: View {
     private var statusColor: Color {
         if progress >= 1.0 { return .expenseRed }
         if progress >= 0.8 { return .orange }
-        return .appPrimary
+        return .incomeGreen
     }
 
     private var isOverBudget: Bool {

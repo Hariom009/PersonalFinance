@@ -1,13 +1,17 @@
 import Foundation
 
 extension Double {
+    private static var selectedCurrencyCode: String {
+        UserDefaults.standard.string(forKey: "selectedCurrencyCode")
+            ?? Locale.current.currency?.identifier
+            ?? "USD"
+    }
+
     var asCurrency: String {
-        let code = Locale.current.currency?.identifier ?? "USD"
-        return formatted(.currency(code: code))
+        formatted(.currency(code: Self.selectedCurrencyCode))
     }
 
     var asCurrencyAbs: String {
-        let code = Locale.current.currency?.identifier ?? "USD"
-        return abs(self).formatted(.currency(code: code))
+        abs(self).formatted(.currency(code: Self.selectedCurrencyCode))
     }
 }

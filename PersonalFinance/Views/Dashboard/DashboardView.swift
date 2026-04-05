@@ -250,7 +250,7 @@ struct DashboardView: View {
                 icon: "wallet.pass",
                 amount: viewModel.leftToSpend,
                 label: "Left to Spend",
-                color: .appPrimary
+                color: .blue
             )
             .scaleEntrance(appeared: hasAppeared, delay: 0.22, reduceMotion: reduceMotion)
         }
@@ -265,7 +265,7 @@ struct DashboardView: View {
             let statusColor: Color = {
                 if percent >= 1.0 { return .expenseRed }
                 if percent >= 0.8 { return .orange }
-                return .appPrimary
+                return .incomeGreen
             }()
 
             VStack(spacing: 8) {
@@ -375,7 +375,7 @@ struct DashboardView: View {
                         .foregroundStyle(.secondary.opacity(0.3))
                     AxisValueLabel {
                         if let amount = value.as(Double.self) {
-                            Text("$\(Int(amount))")
+                            Text(amount.asCurrency)
                                 .font(.caption2)
                                 .foregroundStyle(.secondary)
                         }

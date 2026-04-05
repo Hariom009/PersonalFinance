@@ -10,12 +10,12 @@ struct GoalCardView: View {
         VStack(alignment: .leading, spacing: 10) {
             ZStack {
                 Circle()
-                    .fill(Color.appPrimary.opacity(0.12))
+                    .fill(Color.decorativeIconBg)
                     .frame(width: 40, height: 40)
 
                 Image(systemName: goal.iconName)
                     .font(.system(size: 16))
-                    .foregroundStyle(Color.appPrimary)
+                    .foregroundStyle(.secondary)
             }
 
             Text(goal.name)
@@ -25,11 +25,11 @@ struct GoalCardView: View {
             GeometryReader { geo in
                 ZStack(alignment: .leading) {
                     Capsule()
-                        .fill(Color.appPrimary.opacity(0.15))
+                        .fill(Color.incomeGreen.opacity(0.15))
                         .frame(height: 6)
 
                     Capsule()
-                        .fill(Color.appPrimary)
+                        .fill(Color.incomeGreen)
                         .frame(width: geo.size.width * animatedProgress, height: 6)
                 }
             }

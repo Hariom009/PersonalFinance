@@ -28,7 +28,7 @@ struct StreakCalendarView: View {
                     .frame(width: 28, height: 28)
                     .overlay(
                         Circle()
-                            .strokeBorder(Color.appPrimary, lineWidth: 2)
+                            .strokeBorder(Color.primary, lineWidth: 2)
                             .frame(width: 32, height: 32)
                     )
             } else {

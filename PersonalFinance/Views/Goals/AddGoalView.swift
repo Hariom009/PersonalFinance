@@ -69,7 +69,7 @@ struct AddGoalView: View {
                 .font(.system(size: 40, weight: .bold, design: .rounded))
                 .keyboardType(.decimalPad)
                 .multilineTextAlignment(.center)
-                .foregroundStyle(Color.appPrimary)
+                .foregroundStyle(.primary)
                 .focused($focusedField, equals: .amount)
         }
         .padding(.vertical, 16)

@@ -162,7 +162,7 @@ struct InsightsView: View {
                         .foregroundStyle(.secondary.opacity(0.3))
                     AxisValueLabel {
                         if let amount = value.as(Double.self) {
-                            Text("$\(Int(amount))")
+                            Text(amount.asCurrency)
                                 .font(.caption2)
                                 .foregroundStyle(.secondary)
                         }
@@ -228,7 +228,7 @@ struct InsightsView: View {
                         .foregroundStyle(.secondary.opacity(0.3))
                     AxisValueLabel {
                         if let amount = value.as(Double.self) {
-                            Text("$\(Int(amount))")
+                            Text(amount.asCurrency)
                                 .font(.caption2)
                                 .foregroundStyle(.secondary)
                         }
@@ -285,7 +285,7 @@ struct InsightsView: View {
                             .foregroundStyle(.secondary.opacity(0.3))
                         AxisValueLabel {
                             if let amount = value.as(Double.self) {
-                                Text("$\(Int(amount))")
+                                Text(amount.asCurrency)
                                     .font(.caption2)
                                     .foregroundStyle(.secondary)
                             }
@@ -315,7 +315,7 @@ struct InsightsView: View {
                     icon: "calendar",
                     value: stats.averageDailySpend.asCurrency,
                     label: "Avg. Daily Spend",
-                    color: .appPrimary
+                    color: .orange
                 )
                 .scaleEntrance(appeared: hasAppeared, delay: 0.3, reduceMotion: reduceMotion)
 

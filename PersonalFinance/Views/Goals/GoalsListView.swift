@@ -131,11 +131,11 @@ struct GoalsListView: View {
             GeometryReader { geo in
                 ZStack(alignment: .leading) {
                     Capsule()
-                        .fill(Color.appPrimary.opacity(0.15))
+                        .fill(Color.incomeGreen.opacity(0.15))
                         .frame(height: 8)
 
                     Capsule()
-                        .fill(Color.appPrimary)
+                        .fill(Color.incomeGreen)
                         .frame(width: geo.size.width * overallBarProgress, height: 8)
                 }
             }
@@ -161,12 +161,12 @@ struct GoalsListView: View {
         HStack(spacing: 14) {
             ZStack {
                 Circle()
-                    .fill(completed ? Color.incomeGreen.opacity(0.15) : Color.appPrimary.opacity(0.12))
+                    .fill(completed ? Color.incomeGreen.opacity(0.15) : Color.decorativeIconBg)
                     .frame(width: 44, height: 44)
 
                 Image(systemName: completed ? "checkmark.circle.fill" : goal.iconName)
                     .font(.system(size: 20))
-                    .foregroundStyle(completed ? .incomeGreen : Color.appPrimary)
+                    .foregroundStyle(completed ? .incomeGreen : .secondary)
             }
 
             VStack(alignment: .leading, spacing: 6) {
@@ -176,10 +176,10 @@ struct GoalsListView: View {
                 GeometryReader { geo in
                     ZStack(alignment: .leading) {
                         Capsule()
-                            .fill(Color.appPrimary.opacity(0.15))
+                            .fill(Color.incomeGreen.opacity(0.15))
                             .frame(height: 6)
                         Capsule()
-                            .fill(completed ? Color.incomeGreen : Color.appPrimary)
+                            .fill(Color.incomeGreen)
                             .frame(width: geo.size.width * goal.progress, height: 6)
                     }
                 }
